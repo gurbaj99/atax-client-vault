@@ -1,0 +1,2627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATAX MANTECA - Professional Tax & Insurance Services</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --primary-dark: #0f2744;
+            --secondary: #2c5282;
+            --accent: #3182ce;
+            --accent-light: #63b3ed;
+            --gold: #d69e2e;
+            --success: #38a169;
+            --warning: #dd6b20;
+            --danger: #e53e3e;
+            --text-dark: #1a202c;
+            --text-medium: #4a5568;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --bg-white: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 8px;
+            /* Dark theme for portal */
+            --dark-bg: #0f1419;
+            --dark-card: #1a2332;
+            --dark-border: #2d3748;
+            --dark-text: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: var(--text-dark); line-height: 1.6; }
+        
+        /* ==================== LANDING PAGE ==================== */
+        .landing-page { min-height: 100vh; }
+        
+        /* NAVBAR */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 70px;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .nav-logo-icon {
+            width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 1.1rem;
+        }
+        .nav-logo-text h1 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--primary); line-height: 1.1; }
+        .nav-logo-text span { font-size: 0.65rem; color: var(--text-light); letter-spacing: 1px; }
+        .nav-links { display: flex; align-items: center; gap: 8px; }
+        .nav-link {
+            padding: 10px 18px; color: var(--text-medium); text-decoration: none;
+            font-size: 0.9rem; font-weight: 500; border-radius: 6px; transition: all 0.2s;
+        }
+        .nav-link:hover { background: var(--bg-light); color: var(--primary); }
+        .nav-btn {
+            padding: 10px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; border: none; transition: all 0.2s;
+        }
+        .nav-btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .nav-btn-outline:hover { background: var(--primary); color: white; }
+        .nav-btn-primary { background: var(--accent); color: white; }
+        .nav-btn-primary:hover { background: var(--secondary); }
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        
+        /* HERO */
+        .hero {
+            padding: 140px 20px 80px;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary) 50%, var(--accent) 100%);
+            color: white; text-align: center;
+        }
+        .hero-content { max-width: 800px; margin: 0 auto; }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 20px; line-height: 1.2; }
+        .hero p { font-size: 1.2rem; opacity: 0.9; margin-bottom: 30px; }
+        .hero-btns { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .hero-btn {
+            padding: 15px 30px; border-radius: 8px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; border: none; transition: all 0.3s;
+        }
+        .hero-btn-primary { background: var(--gold); color: var(--primary-dark); }
+        .hero-btn-primary:hover { background: #e9b949; transform: translateY(-2px); }
+        .hero-btn-secondary { background: rgba(255,255,255,0.15); color: white; border: 2px solid white; }
+        .hero-btn-secondary:hover { background: white; color: var(--primary); }
+        .hero-features {
+            display: flex; justify-content: center; gap: 40px; margin-top: 50px; flex-wrap: wrap;
+        }
+        .hero-feature { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; }
+        .hero-feature-icon { font-size: 1.5rem; }
+        
+        /* SERVICES */
+        .services { padding: 80px 20px; background: var(--bg-light); }
+        .section-container { max-width: 1200px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 50px; }
+        .section-header h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--primary); margin-bottom: 15px; }
+        .section-header p { color: var(--text-medium); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .service-card {
+            background: white; border-radius: 12px; padding: 30px; box-shadow: var(--shadow);
+            transition: all 0.3s; border: 1px solid var(--border);
+        }
+        .service-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        .service-icon { font-size: 2.5rem; margin-bottom: 20px; }
+        .service-card h3 { font-size: 1.3rem; color: var(--primary); margin-bottom: 12px; }
+        .service-card p { color: var(--text-medium); font-size: 0.95rem; margin-bottom: 15px; }
+        .service-list { list-style: none; }
+        .service-list li { padding: 6px 0; color: var(--text-medium); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .service-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+        
+        /* INSURANCE PARTNERS */
+        .partners { padding: 60px 20px; background: white; }
+        .partners-logos { display: flex; justify-content: center; align-items: center; gap: 50px; flex-wrap: wrap; opacity: 0.7; }
+        .partner-logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        
+        /* WHY CHOOSE US */
+        .why-us { padding: 80px 20px; background: var(--primary); color: white; }
+        .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-top: 40px; }
+        .why-item { text-align: center; padding: 20px; }
+        .why-icon { font-size: 3rem; margin-bottom: 15px; }
+        .why-item h3 { font-size: 1.2rem; margin-bottom: 10px; }
+        .why-item p { opacity: 0.85; font-size: 0.95rem; }
+        
+        /* CONTACT */
+        .contact { padding: 80px 20px; background: var(--bg-light); }
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: start; }
+        .contact-info h3 { font-size: 1.5rem; color: var(--primary); margin-bottom: 20px; }
+        .contact-item { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 20px; }
+        .contact-icon { width: 45px; height: 45px; background: var(--accent); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .contact-text h4 { font-size: 1rem; color: var(--text-dark); margin-bottom: 3px; }
+        .contact-text p { color: var(--text-medium); font-size: 0.9rem; }
+        .contact-text a { color: var(--accent); text-decoration: none; }
+        .contact-form { background: white; padding: 30px; border-radius: 12px; box-shadow: var(--shadow); }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-dark); font-size: 0.9rem; }
+        .form-input { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; transition: border-color 0.2s; }
+        .form-input:focus { outline: none; border-color: var(--accent); }
+        .form-textarea { min-height: 100px; resize: vertical; }
+        .form-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .form-btn:hover { background: var(--secondary); }
+        
+        /* FOOTER */
+        .footer { background: var(--primary-dark); color: white; padding: 50px 20px 20px; }
+        .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; }
+        .footer-col h4 { font-size: 1.1rem; margin-bottom: 20px; }
+        .footer-col ul { list-style: none; }
+        .footer-col li { margin-bottom: 10px; }
+        .footer-col a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .footer-col a:hover { color: white; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; font-size: 0.85rem; opacity: 0.7; }
+        
+        /* ==================== AUTH MODAL ==================== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .auth-modal {
+            background: white; border-radius: 16px; width: 100%; max-width: 440px;
+            box-shadow: var(--shadow-lg); overflow: hidden;
+        }
+        .auth-header { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 30px; text-align: center; }
+        .auth-header h2 { font-size: 1.5rem; margin-bottom: 5px; }
+        .auth-header p { opacity: 0.9; font-size: 0.9rem; }
+        .auth-tabs { display: flex; background: var(--bg-light); }
+        .auth-tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-weight: 500; font-size: 0.9rem; border: none; background: none; color: var(--text-medium); transition: all 0.2s; }
+        .auth-tab.active { background: white; color: var(--primary); box-shadow: 0 -2px 0 var(--accent) inset; }
+        .auth-body { padding: 25px; }
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+        .auth-alert { padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem; display: none; }
+        .auth-alert.error { background: #fed7d7; color: #c53030; display: block; }
+        .auth-alert.success { background: #c6f6d5; color: #276749; display: block; }
+        .auth-close { position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; opacity: 0.8; }
+        .auth-close:hover { opacity: 1; }
+        
+        /* ==================== PORTAL (DARK THEME) ==================== */
+        .portal { display: none; min-height: 100vh; background: var(--dark-bg); color: var(--dark-text); }
+        .portal.active { display: flex; }
+        
+        .portal-sidebar {
+            width: 260px; background: var(--dark-card); border-right: 1px solid var(--dark-border);
+            padding: 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; overflow-y: auto;
+        }
+        .portal-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--accent-light); margin-bottom: 5px; }
+        .portal-logo-sub { font-size: 0.7rem; color: var(--text-light); margin-bottom: 20px; }
+        .portal-user {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 25px;
+        }
+        .portal-avatar {
+            width: 40px; height: 40px; border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            display: flex; align-items: center; justify-content: center; font-weight: 700;
+        }
+        .portal-user-info { flex: 1; }
+        .portal-user-name { font-weight: 600; font-size: 0.9rem; }
+        .portal-user-role { font-size: 0.7rem; color: var(--text-light); }
+        .portal-logout { background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 1.1rem; }
+        .portal-logout:hover { color: var(--danger); }
+        
+        .portal-nav-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin: 20px 0 10px 10px; }
+        .portal-nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+            border-radius: 8px; cursor: pointer; color: var(--text-light); font-size: 0.9rem;
+            margin-bottom: 4px; transition: all 0.2s;
+        }
+        .portal-nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .portal-nav-item.active { background: var(--accent); color: white; }
+        .portal-nav-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+        .portal-nav-badge { margin-left: auto; background: var(--danger); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; }
+        
+        .portal-main { margin-left: 260px; flex: 1; padding: 25px; min-height: 100vh; }
+        .portal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .portal-title { font-size: 1.5rem; font-weight: 700; }
+        .portal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .portal-btn {
+            padding: 10px 18px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .portal-btn-primary { background: var(--accent); color: white; }
+        .portal-btn-primary:hover { background: var(--secondary); }
+        .portal-btn-success { background: var(--success); color: white; }
+        .portal-btn-outline { background: transparent; border: 1px solid var(--dark-border); color: var(--dark-text); }
+        .portal-btn-outline:hover { background: rgba(255,255,255,0.05); }
+        
+        .portal-card {
+            background: var(--dark-card); border-radius: 12px; border: 1px solid var(--dark-border);
+            margin-bottom: 20px; overflow: hidden;
+        }
+        .portal-card-header {
+            padding: 15px 20px; border-bottom: 1px solid var(--dark-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .portal-card-title { font-weight: 600; font-size: 1rem; }
+        .portal-card-body { padding: 20px; }
+        
+        .portal-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .portal-stat {
+            background: var(--dark-card); border-radius: 10px; padding: 18px; border: 1px solid var(--dark-border);
+        }
+        .portal-stat-icon { width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 1.1rem; }
+        .portal-stat-icon.blue { background: rgba(49,130,206,0.15); }
+        .portal-stat-icon.green { background: rgba(56,161,105,0.15); }
+        .portal-stat-icon.gold { background: rgba(214,158,46,0.15); }
+        .portal-stat-icon.red { background: rgba(229,62,62,0.15); }
+        .portal-stat-value { font-size: 1.4rem; font-weight: 700; margin-bottom: 3px; }
+        .portal-stat-label { font-size: 0.75rem; color: var(--text-light); }
+        
+        .portal-table { width: 100%; border-collapse: collapse; }
+        .portal-table th { text-align: left; padding: 12px 15px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-light); background: rgba(0,0,0,0.2); }
+        .portal-table td { padding: 14px 15px; border-bottom: 1px solid var(--dark-border); font-size: 0.85rem; }
+        .portal-table tr:hover { background: rgba(255,255,255,0.02); }
+        
+        .portal-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .portal-badge.green { background: rgba(56,161,105,0.15); color: #68d391; }
+        .portal-badge.yellow { background: rgba(214,158,46,0.15); color: #f6e05e; }
+        .portal-badge.blue { background: rgba(49,130,206,0.15); color: #63b3ed; }
+        .portal-badge.red { background: rgba(229,62,62,0.15); color: #fc8181; }
+        
+        .portal-view { display: none; }
+        .portal-view.active { display: block; }
+        
+        .search-box { position: relative; }
+        .search-box input {
+            width: 100%; padding: 10px 15px 10px 40px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--dark-border); border-radius: 8px; color: white; font-size: 0.9rem;
+        }
+        .search-box input::placeholder { color: var(--text-light); }
+        .search-box input:focus { outline: none; border-color: var(--accent); }
+        .search-box::before { content: "🔍"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.9rem; }
+        
+        .client-row { display: flex; align-items: center; gap: 12px; }
+        .client-avatar { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75rem; flex-shrink: 0; }
+        .client-info h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+        .client-info span { font-size: 0.75rem; color: var(--text-light); }
+        
+        .action-btns { display: flex; gap: 6px; }
+        .action-btn {
+            width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--dark-border);
+            background: rgba(255,255,255,0.03); color: var(--text-light); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .action-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .action-btn.docs { background: rgba(49,130,206,0.15); border-color: var(--accent); }
+        .action-btn.docs:hover { background: rgba(49,130,206,0.3); }
+        .action-btn.delete:hover { background: rgba(229,62,62,0.15); color: #fc8181; }
+        
+        /* File Management */
+        .files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .file-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--dark-border);
+            border-radius: 10px; padding: 20px; text-align: center; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .file-card:hover { background: rgba(255,255,255,0.06); border-color: var(--accent); }
+        .file-card.active { background: rgba(49,130,206,0.15); border-color: var(--accent); }
+        .file-card-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .file-card h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-card span { font-size: 0.7rem; color: var(--text-light); }
+        
+        .upload-zone {
+            border: 2px dashed var(--dark-border); border-radius: 12px; padding: 40px;
+            text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 20px;
+        }
+        .upload-zone:hover { border-color: var(--accent); background: rgba(49,130,206,0.05); }
+        .upload-zone input { display: none; }
+        .upload-zone-icon { font-size: 3rem; margin-bottom: 15px; }
+        .upload-zone h4 { font-size: 1rem; margin-bottom: 5px; }
+        .upload-zone p { font-size: 0.85rem; color: var(--text-light); }
+        
+        .file-list { margin-top: 15px; }
+        .file-row {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px;
+        }
+        .file-row-icon { font-size: 1.5rem; }
+        .file-row-info { flex: 1; }
+        .file-row-name { font-size: 0.9rem; font-weight: 500; }
+        .file-row-meta { font-size: 0.75rem; color: var(--text-light); }
+        .file-row-actions { display: flex; gap: 8px; }
+        
+        /* Modals */
+        .portal-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 3000; padding: 20px;
+        }
+        .portal-modal-overlay.active { display: flex; }
+        .portal-modal {
+            background: var(--dark-card); border-radius: 16px; width: 100%; max-width: 600px;
+            max-height: 90vh; overflow: hidden; border: 1px solid var(--dark-border);
+        }
+        .portal-modal.lg { max-width: 800px; }
+        .portal-modal-header {
+            padding: 20px; border-bottom: 1px solid var(--dark-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .portal-modal-title { font-size: 1.2rem; font-weight: 600; }
+        .portal-modal-close { background: none; border: none; color: var(--text-light); font-size: 1.5rem; cursor: pointer; }
+        .portal-modal-close:hover { color: white; }
+        .portal-modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
+        .portal-modal-footer { padding: 15px 20px; border-top: 1px solid var(--dark-border); display: flex; justify-content: flex-end; gap: 10px; }
+        
+        .portal-form-group { margin-bottom: 18px; }
+        .portal-form-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-light); }
+        .portal-form-input {
+            width: 100%; padding: 12px 15px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--dark-border); border-radius: 8px; color: white; font-size: 0.9rem;
+        }
+        .portal-form-input:focus { outline: none; border-color: var(--accent); }
+        .portal-form-input::placeholder { color: var(--text-light); }
+        .portal-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .portal-form-select { background: var(--dark-card); }
+        
+        /* Customer Portal Specific */
+        .customer-hero {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            padding: 30px; border-radius: 12px; margin-bottom: 25px; text-align: center;
+        }
+        .customer-hero h2 { font-size: 1.5rem; margin-bottom: 8px; }
+        .customer-hero p { opacity: 0.9; }
+        
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .info-card { background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 10px; padding: 18px; }
+        .info-card-label { font-size: 0.75rem; color: var(--text-light); margin-bottom: 5px; }
+        .info-card-value { font-size: 1.1rem; font-weight: 600; }
+        
+        /* Loading */
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--dark-bg); display: flex; align-items: center; justify-content: center;
+            flex-direction: column; z-index: 9999;
+        }
+        .loading-overlay.hidden { display: none; }
+        .loading-spinner { width: 50px; height: 50px; border: 4px solid var(--dark-border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 15px; color: var(--text-light); font-size: 0.9rem; }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .contact-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2.2rem; }
+            .portal-sidebar { display: none; }
+            .portal-main { margin-left: 0; }
+        }
+        
+        .hidden { display: none !important; }
+        
+        /* Mobile Portal Navigation */
+        .portal-mobile-header {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1500;
+            background: var(--dark-card); border-bottom: 1px solid var(--dark-border);
+            padding: 12px 16px; align-items: center; justify-content: space-between;
+        }
+        .portal-mobile-header h3 { font-size: 1rem; color: var(--accent-light); font-family: 'Playfair Display', serif; }
+        .portal-mobile-header button { background: none; border: none; color: var(--dark-text); font-size: 1.5rem; cursor: pointer; }
+        
+        .portal-mobile-nav {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+            z-index: 2500; padding: 20px;
+        }
+        .portal-mobile-nav.active { display: flex; flex-direction: column; }
+        .portal-mobile-nav-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            padding-bottom: 15px; border-bottom: 1px solid var(--dark-border);
+        }
+        .portal-mobile-nav-header h3 { color: var(--accent-light); font-family: 'Playfair Display', serif; }
+        .portal-mobile-nav-header button { background: none; border: none; color: white; font-size: 1.8rem; cursor: pointer; }
+        .portal-mobile-nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 16px;
+            border-radius: 10px; color: var(--dark-text); font-size: 1rem;
+            cursor: pointer; margin-bottom: 6px; transition: all 0.2s;
+        }
+        .portal-mobile-nav-item:hover, .portal-mobile-nav-item.active { background: var(--accent); color: white; }
+        .portal-mobile-nav-item .portal-nav-icon { font-size: 1.2rem; }
+        
+        @media (max-width: 900px) {
+            .nav-links { 
+                display: none; 
+                position: absolute; top: 70px; left: 0; right: 0;
+                background: white; flex-direction: column; padding: 15px;
+                border-bottom: 1px solid var(--border); box-shadow: var(--shadow-lg);
+            }
+            .nav-links.mobile-open { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .contact-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .hero-features { gap: 20px; }
+            .hero-btns { flex-direction: column; align-items: center; }
+            
+            /* Portal Mobile */
+            .portal-sidebar { display: none !important; }
+            .portal-main { margin-left: 0 !important; padding: 15px !important; padding-top: 65px !important; }
+            .portal-mobile-header { display: flex; }
+            .portal-header { flex-direction: column; align-items: flex-start; }
+            .portal-actions { width: 100%; flex-wrap: wrap; }
+            .search-box { width: 100% !important; }
+            .portal-stats { grid-template-columns: repeat(2, 1fr) !important; }
+            .portal-form-row { grid-template-columns: 1fr !important; }
+            .portal-table th, .portal-table td { padding: 10px 8px; font-size: 0.75rem; }
+            .portal-modal { max-width: 95vw !important; }
+            .portal-modal-body { max-height: 70vh; }
+            .info-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .files-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .file-row { flex-wrap: wrap; }
+            .file-row-actions { width: 100%; justify-content: flex-end; margin-top: 8px; }
+            .customer-hero { padding: 20px; }
+            .customer-hero h2 { font-size: 1.2rem; }
+            .action-btns { flex-wrap: wrap; }
+        }
+        
+        @media (max-width: 480px) {
+            .portal-stats { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+            .info-grid { grid-template-columns: 1fr !important; }
+            .files-grid { grid-template-columns: 1fr !important; }
+            .portal-table { font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <!-- ==================== LANDING PAGE ==================== -->
+    <div class="landing-page" id="landingPage">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <div class="nav-logo-icon">AT</div>
+                    <div class="nav-logo-text">
+                        <h1>ATAX MANTECA</h1>
+                        <span>TAX & INSURANCE SERVICES</span>
+                    </div>
+                </div>
+                <div class="nav-links">
+                    <a href="#services" class="nav-link">Services</a>
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                    <button class="nav-btn nav-btn-outline" id="navCustLogin" onclick="openAuthModal('customer')">Customer Login</button>
+                    <button class="nav-btn nav-btn-primary" id="navAdminLogin" onclick="openAuthModal('admin')">Admin</button>
+                    <button class="nav-btn nav-btn-primary" id="navReturnPortal" onclick="returnToPortal()" style="display:none;background:var(--success);">↩ My Portal</button>
+                </div>
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Professional Tax Preparation & Insurance Services</h1>
+                <p>Serving Manteca and the Central Valley with expert tax filing, health coverage through Covered California, dental plans, and life insurance solutions.</p>
+                <div class="hero-btns">
+                    <button class="hero-btn hero-btn-primary" onclick="openAuthModal('customer')">📋 Customer Portal</button>
+                    <button class="hero-btn hero-btn-secondary" onclick="scrollToSection('contact')">📞 Contact Us</button>
+                </div>
+                <div class="hero-features">
+                    <div class="hero-feature"><span class="hero-feature-icon">✓</span> IRS Certified</div>
+                    <div class="hero-feature"><span class="hero-feature-icon">🏥</span> Covered CA Agent</div>
+                    <div class="hero-feature"><span class="hero-feature-icon">💰</span> Fast Refunds</div>
+                    <div class="hero-feature"><span class="hero-feature-icon">🔒</span> Secure Portal</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services -->
+        <section class="services" id="services">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>Our Services</h2>
+                    <p>Comprehensive financial services to meet all your tax and insurance needs</p>
+                </div>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon">📊</div>
+                        <h3>Tax Preparation</h3>
+                        <p>Expert tax filing for individuals and businesses with maximum refund guarantee.</p>
+                        <ul class="service-list">
+                            <li>Individual & Family Returns</li>
+                            <li>Self-Employment Tax</li>
+                            <li>Small Business Filing</li>
+                            <li>Prior Year Returns</li>
+                            <li>Tax Planning & Advice</li>
+                        </ul>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">🏥</div>
+                        <h3>Health Insurance</h3>
+                        <p>Covered California certified agent helping you find affordable health coverage.</p>
+                        <ul class="service-list">
+                            <li>Kaiser Permanente Plans</li>
+                            <li>Blue Shield of California</li>
+                            <li>Health Net Plans</li>
+                            <li>Medi-Cal Assistance</li>
+                            <li>Subsidy Qualification Help</li>
+                        </ul>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">🦷</div>
+                        <h3>Dental Coverage</h3>
+                        <p>Affordable dental plans for individuals and families with comprehensive coverage.</p>
+                        <ul class="service-list">
+                            <li>Dental PPO Plans</li>
+                            <li>Dental HMO Plans</li>
+                            <li>Family Dental Coverage</li>
+                            <li>Preventive Care 100% Covered</li>
+                            <li>Orthodontia Options</li>
+                        </ul>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">🛡️</div>
+                        <h3>Life Insurance</h3>
+                        <p>Protect your family's future with affordable life insurance solutions.</p>
+                        <ul class="service-list">
+                            <li>Term Life Insurance</li>
+                            <li>Whole Life Insurance</li>
+                            <li>Final Expense Coverage</li>
+                            <li>Family Protection Plans</li>
+                            <li>Free Quote & Consultation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Partners -->
+        <section class="partners">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>Insurance Partners</h2>
+                </div>
+                <div class="partners-logos">
+                    <div class="partner-logo">Kaiser Permanente</div>
+                    <div class="partner-logo">Blue Shield</div>
+                    <div class="partner-logo">Health Net</div>
+                    <div class="partner-logo">Covered CA</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Us -->
+        <section class="why-us" id="about">
+            <div class="section-container">
+                <div class="section-header" style="color:white;">
+                    <h2 style="color:white;">Why Choose ATAX MANTECA?</h2>
+                    <p style="color:rgba(255,255,255,0.8);">Trusted by families throughout the Central Valley</p>
+                </div>
+                <div class="why-grid">
+                    <div class="why-item">
+                        <div class="why-icon">👨‍💼</div>
+                        <h3>Expert Service</h3>
+                        <p>IRS certified tax preparers with years of experience serving our community.</p>
+                    </div>
+                    <div class="why-item">
+                        <div class="why-icon">💻</div>
+                        <h3>Online Portal</h3>
+                        <p>Secure customer portal to upload documents and download your tax returns anytime.</p>
+                    </div>
+                    <div class="why-item">
+                        <div class="why-icon">⚡</div>
+                        <h3>Fast Refunds</h3>
+                        <p>E-file with direct deposit for the fastest possible refund processing.</p>
+                    </div>
+                    <div class="why-item">
+                        <div class="why-icon">🤝</div>
+                        <h3>Personal Touch</h3>
+                        <p>We treat every client like family, providing personalized attention to your needs.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section class="contact" id="contact">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>Contact Us</h2>
+                    <p>Get in touch for a free consultation</p>
+                </div>
+                <div class="contact-grid">
+                    <div class="contact-info">
+                        <h3>Get In Touch</h3>
+                        <div class="contact-item">
+                            <div class="contact-icon">📧</div>
+                            <div class="contact-text">
+                                <h4>Email</h4>
+                                <p><a href="mailto:info@ataxmanteca.com">info@ataxmanteca.com</a></p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📞</div>
+                            <div class="contact-text">
+                                <h4>Phone</h4>
+                                <p><a href="tel:5139002727">(513) 900-2727</a></p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📍</div>
+                            <div class="contact-text">
+                                <h4>Location</h4>
+                                <p>Manteca, CA 95336</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">🕐</div>
+                            <div class="contact-text">
+                                <h4>Hours</h4>
+                                <p>Mon - Sat: 9:00 AM - 7:00 PM<br>Sunday: By Appointment</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-form">
+                        <form onsubmit="handleContactSubmit(event)">
+                            <div class="form-group">
+                                <label>Your Name</label>
+                                <input type="text" class="form-input" placeholder="John Doe" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" class="form-input" placeholder="john@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" class="form-input" placeholder="(555) 123-4567">
+                            </div>
+                            <div class="form-group">
+                                <label>Message</label>
+                                <textarea class="form-input form-textarea" placeholder="How can we help you?"></textarea>
+                            </div>
+                            <button type="submit" class="form-btn">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>ATAX MANTECA</h4>
+                    <p style="opacity:0.7;font-size:0.9rem;">Professional tax preparation and insurance services serving Manteca and the Central Valley community.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="#">Tax Preparation</a></li>
+                        <li><a href="#">Health Insurance</a></li>
+                        <li><a href="#">Dental Plans</a></li>
+                        <li><a href="#">Life Insurance</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#" onclick="openAuthModal('customer')">Customer Portal</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                        <li><a href="#services">Our Services</a></li>
+                        <li><a href="#about">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:info@ataxmanteca.com">info@ataxmanteca.com</a></li>
+                        <li><a href="tel:5139002727">(513) 900-2727</a></li>
+                        <li><a href="#">Manteca, CA 95336</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2025 ATAX MANTECA. All Rights Reserved.
+            </div>
+        </footer>
+    </div>
+
+    <!-- ==================== AUTH MODAL ==================== -->
+    <div class="modal-overlay" id="authModal">
+        <div class="auth-modal" style="position:relative;">
+            <button class="auth-close" onclick="closeAuthModal()">&times;</button>
+            <div class="auth-header">
+                <h2>Welcome Back</h2>
+                <p>Login to access your account</p>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="customer" onclick="switchAuthTab('customer')">Customer</button>
+                <button class="auth-tab" data-tab="admin" onclick="switchAuthTab('admin')">Admin</button>
+            </div>
+            <div class="auth-body">
+                <div id="authAlert" class="auth-alert"></div>
+                
+                <!-- Customer Auth -->
+                <div class="auth-form active" id="customerAuthForm">
+                    <div class="auth-tabs" style="margin-bottom:15px;border-radius:8px;overflow:hidden;">
+                        <button class="auth-tab active" data-sub="login" onclick="switchCustomerSubTab('login')">Login</button>
+                        <button class="auth-tab" data-sub="register" onclick="switchCustomerSubTab('register')">Register</button>
+                    </div>
+                    
+                    <!-- Customer Login -->
+                    <div id="customerLogin">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-input" id="custLoginEmail" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-input" id="custLoginPass" placeholder="••••••••">
+                        </div>
+                        <button class="form-btn" onclick="customerLogin()">Login</button>
+                    </div>
+                    
+                    <!-- Customer Register -->
+                    <div id="customerRegister" class="hidden">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" class="form-input" id="regFirstName">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" class="form-input" id="regLastName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" class="form-input" id="regEmail">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" class="form-input" id="regPhone">
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" class="form-input" id="regAddress">
+                        </div>
+                        <div class="form-group">
+                            <label>Password *</label>
+                            <input type="password" class="form-input" id="regPassword" placeholder="Min 6 characters">
+                        </div>
+                        <button class="form-btn" onclick="customerRegister()">Create Account</button>
+                    </div>
+                </div>
+                
+                <!-- Admin Auth -->
+                <div class="auth-form" id="adminAuthForm">
+                    <div class="form-group">
+                        <label>Admin Email</label>
+                        <input type="email" class="form-input" id="adminEmail" placeholder="admin@ataxmanteca.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" class="form-input" id="adminPass" placeholder="••••••••">
+                    </div>
+                    <button class="form-btn" onclick="adminLogin()">Admin Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADMIN PORTAL ==================== -->
+    <div class="portal" id="adminPortal">
+        <!-- Mobile Header -->
+        <div class="portal-mobile-header" id="adminMobileHeader">
+            <h3>ATAX MANTECA</h3>
+            <div style="display:flex;gap:12px;">
+                <button onclick="openMobileNav('admin')">☰</button>
+                <button onclick="logout()" style="font-size:1.2rem;">🚪</button>
+            </div>
+        </div>
+        <!-- Mobile Nav Overlay -->
+        <div class="portal-mobile-nav" id="adminMobileNav">
+            <div class="portal-mobile-nav-header">
+                <h3>ATAX Admin</h3>
+                <button onclick="closeMobileNav('admin')">&times;</button>
+            </div>
+            <div class="portal-mobile-nav-item active" onclick="mobileNavTo('adminDashboard','admin')"><span class="portal-nav-icon">📊</span> Dashboard</div>
+            <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminPending','admin')"><span class="portal-nav-icon">⏳</span> Pending Approvals</div>
+            <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminUploads','admin')"><span class="portal-nav-icon">📤</span> Customer Uploads</div>
+            <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminFiles','admin')"><span class="portal-nav-icon">📁</span> Client Files</div>
+            <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminLinks','admin')"><span class="portal-nav-icon">🔗</span> Quick Links</div>
+            <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminSettings','admin')"><span class="portal-nav-icon">⚙️</span> Settings</div>
+            <div style="margin-top:auto;padding-top:20px;">
+                <div class="portal-mobile-nav-item" onclick="logout()" style="color:var(--danger);"><span class="portal-nav-icon">🚪</span> Logout</div>
+            </div>
+        </div>
+        <aside class="portal-sidebar">
+            <div class="portal-logo">ATAX MANTECA</div>
+            <div class="portal-logo-sub">Admin Portal</div>
+            <div class="portal-user">
+                <div class="portal-avatar">A</div>
+                <div class="portal-user-info">
+                    <div class="portal-user-name" id="adminDisplayName">Admin</div>
+                    <div class="portal-user-role">Administrator</div>
+                </div>
+                <button class="portal-logout" onclick="logout()">🚪</button>
+            </div>
+            <nav>
+                <div class="portal-nav-title">Main</div>
+                <div class="portal-nav-item active" data-view="adminDashboard"><span class="portal-nav-icon">📊</span> Dashboard</div>
+                <div class="portal-nav-item" data-view="adminPending"><span class="portal-nav-icon">⏳</span> Pending Approvals <span class="portal-nav-badge" id="pendingBadge">0</span></div>
+                <div class="portal-nav-item" data-view="adminUploads"><span class="portal-nav-icon">📤</span> Customer Uploads <span class="portal-nav-badge" id="uploadsBadge" style="background:var(--accent);">0</span></div>
+                
+                <div class="portal-nav-title">Management</div>
+                <div class="portal-nav-item" data-view="adminFiles"><span class="portal-nav-icon">📁</span> Client Files</div>
+                <div class="portal-nav-item" data-view="adminLinks"><span class="portal-nav-icon">🔗</span> Quick Links</div>
+                
+                <div class="portal-nav-title">System</div>
+                <div class="portal-nav-item" data-view="adminSettings"><span class="portal-nav-icon">⚙️</span> Settings</div>
+            </nav>
+            <div style="margin-top:auto;padding-top:20px;font-size:0.7rem;color:var(--text-light);text-align:center;">
+                ATAX Client Vault v10<br>&copy; 2025 ATAX MANTECA
+            </div>
+        </aside>
+        
+        <main class="portal-main">
+            <!-- Dashboard View -->
+            <div class="portal-view active" id="adminDashboardView">
+                <div class="portal-header">
+                    <h1 class="portal-title">Dashboard</h1>
+                    <div class="portal-actions">
+                        <div class="search-box" style="width:250px;">
+                            <input type="text" placeholder="Search clients..." id="clientSearch" oninput="filterClients()">
+                        </div>
+                        <button class="portal-btn portal-btn-primary" onclick="openClientModal()">➕ Add Client</button>
+                        <button class="portal-btn portal-btn-success" onclick="openCreateAccountModal()">👤 Create Login</button>
+                    </div>
+                </div>
+                <div class="portal-stats" id="adminStats"></div>
+                <div class="portal-card">
+                    <div class="portal-card-header">
+                        <span class="portal-card-title">Clients</span>
+                        <div style="display:flex;gap:5px;">
+                            <button class="portal-btn portal-btn-outline" data-filter="all" onclick="setFilter('all')">All</button>
+                            <button class="portal-btn portal-btn-outline" data-filter="completed" onclick="setFilter('completed')">Completed</button>
+                            <button class="portal-btn portal-btn-outline" data-filter="pending" onclick="setFilter('pending')">Pending</button>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="portal-table">
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Tax Year</th>
+                                    <th>Income</th>
+                                    <th>Refund/Owed</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending View -->
+            <div class="portal-view" id="adminPendingView">
+                <div class="portal-header">
+                    <h1 class="portal-title">Pending Approvals</h1>
+                </div>
+                <p style="color:var(--text-light);margin-bottom:20px;">Review and approve customer registrations</p>
+                <div id="pendingListArea"></div>
+            </div>
+            
+            <!-- Uploads View -->
+            <div class="portal-view" id="adminUploadsView">
+                <div class="portal-header">
+                    <h1 class="portal-title">Customer Uploads</h1>
+                </div>
+                <p style="color:var(--text-light);margin-bottom:20px;">Documents uploaded by customers</p>
+                <div id="customerUploadsArea"></div>
+            </div>
+            
+            <!-- Files View -->
+            <div class="portal-view" id="adminFilesView">
+                <div class="portal-header">
+                    <h1 class="portal-title">Client Files</h1>
+                </div>
+                <p style="color:var(--text-light);margin-bottom:20px;">Select a client to manage their documents</p>
+                <div class="files-grid" id="fileClientsGrid"></div>
+                <div id="selectedClientFiles" class="hidden">
+                    <div class="portal-card" style="margin-top:20px;">
+                        <div class="portal-card-header">
+                            <span class="portal-card-title" id="selectedClientTitle">Client Files</span>
+                            <button class="portal-btn portal-btn-primary" onclick="document.getElementById('adminFileUpload').click()">📤 Upload Files</button>
+                            <input type="file" id="adminFileUpload" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleAdminFileUpload(event)" style="display:none;">
+                        </div>
+                        <div class="portal-card-body">
+                            <div id="selectedClientFilesList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Links View -->
+            <div class="portal-view" id="adminLinksView">
+                <div class="portal-header">
+                    <h1 class="portal-title">Quick Links</h1>
+                    <button class="portal-btn portal-btn-primary" onclick="openLinkModal()">➕ Add Link</button>
+                </div>
+                <div id="linksGrid" class="files-grid"></div>
+            </div>
+            
+            <!-- Settings View -->
+            <div class="portal-view" id="adminSettingsView">
+                <div class="portal-header">
+                    <h1 class="portal-title">Settings</h1>
+                </div>
+                <div class="portal-card">
+                    <div class="portal-card-header"><span class="portal-card-title">🔐 Change Password</span></div>
+                    <div class="portal-card-body">
+                        <div class="portal-form-group" style="max-width:300px;">
+                            <label>New Password</label>
+                            <input type="password" class="portal-form-input" id="newAdminPass" placeholder="Min 6 characters">
+                        </div>
+                        <button class="portal-btn portal-btn-primary" onclick="changeAdminPassword()">Update Password</button>
+                    </div>
+                </div>
+                <div class="portal-card">
+                    <div class="portal-card-header"><span class="portal-card-title">🔗 Customer Registration Link</span></div>
+                    <div class="portal-card-body">
+                        <p style="color:var(--text-light);margin-bottom:10px;">Share this link with customers:</p>
+                        <div style="background:rgba(0,0,0,0.2);padding:12px;border-radius:6px;font-family:monospace;font-size:0.85rem;word-break:break-all;" id="regLinkDisplay"></div>
+                        <button class="portal-btn portal-btn-outline" style="margin-top:10px;" onclick="copyRegLink()">📋 Copy Link</button>
+                    </div>
+                </div>
+                <div class="portal-card">
+                    <div class="portal-card-header"><span class="portal-card-title">💾 Backup & Restore</span></div>
+                    <div class="portal-card-body">
+                        <button class="portal-btn portal-btn-primary" onclick="downloadBackup()">💾 Download Backup</button>
+                        <button class="portal-btn portal-btn-outline" onclick="document.getElementById('restoreInput').click()">📂 Restore</button>
+                        <input type="file" id="restoreInput" accept=".json" onchange="restoreBackup(event)" style="display:none;">
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== CUSTOMER PORTAL ==================== -->
+    <div class="portal" id="customerPortal">
+        <!-- Mobile Header -->
+        <div class="portal-mobile-header" id="custMobileHeader">
+            <h3>ATAX MANTECA</h3>
+            <div style="display:flex;gap:12px;">
+                <button onclick="openMobileNav('customer')">☰</button>
+                <button onclick="logout()" style="font-size:1.2rem;">🚪</button>
+            </div>
+        </div>
+        <!-- Mobile Nav Overlay -->
+        <div class="portal-mobile-nav" id="custMobileNav">
+            <div class="portal-mobile-nav-header">
+                <h3>My Portal</h3>
+                <button onclick="closeMobileNav('customer')">&times;</button>
+            </div>
+            <div class="portal-mobile-nav-item active" onclick="mobileNavTo('custDashboard','customer')"><span class="portal-nav-icon">📊</span> My Tax Info</div>
+            <div class="portal-mobile-nav-item" onclick="mobileNavTo('custFiles','customer')"><span class="portal-nav-icon">📁</span> My Documents</div>
+            <div class="portal-mobile-nav-item" onclick="mobileNavTo('custUpload','customer')"><span class="portal-nav-icon">📤</span> Upload Files</div>
+            <div style="margin-top:30px;padding-top:20px;border-top:1px solid var(--dark-border);">
+                <div class="portal-mobile-nav-item" onclick="goToWebsite()" style="color:var(--accent-light);"><span class="portal-nav-icon">🌐</span> Back to Website</div>
+                <div class="portal-mobile-nav-item" onclick="logout()" style="color:var(--danger);"><span class="portal-nav-icon">🚪</span> Logout</div>
+            </div>
+        </div>
+        <aside class="portal-sidebar">
+            <div class="portal-logo">ATAX MANTECA</div>
+            <div class="portal-logo-sub">Customer Portal</div>
+            <div class="portal-user">
+                <div class="portal-avatar" id="custPortalAvatar" style="background:linear-gradient(135deg, #38a169, #2f855a);">C</div>
+                <div class="portal-user-info">
+                    <div class="portal-user-name" id="custPortalName">Customer</div>
+                    <div class="portal-user-role">Customer</div>
+                </div>
+                <button class="portal-logout" onclick="logout()">🚪</button>
+            </div>
+            <nav>
+                <div class="portal-nav-item active" data-view="custDashboard" data-portal="customer"><span class="portal-nav-icon">📊</span> My Tax Info</div>
+                <div class="portal-nav-item" data-view="custFiles" data-portal="customer"><span class="portal-nav-icon">📁</span> My Documents</div>
+                <div class="portal-nav-item" data-view="custUpload" data-portal="customer"><span class="portal-nav-icon">📤</span> Upload Files</div>
+            </nav>
+            <div style="margin-top:auto;padding-top:20px;">
+                <button class="portal-btn portal-btn-outline" style="width:100%;" onclick="goToWebsite()">🌐 Back to Website</button>
+            </div>
+        </aside>
+        
+        <main class="portal-main">
+            <!-- Customer Dashboard -->
+            <div class="portal-view active" id="custDashboardView">
+                <div class="customer-hero">
+                    <h2 id="custWelcomeMsg">Welcome!</h2>
+                    <p>View your tax information below</p>
+                </div>
+                <div class="info-grid" id="custInfoArea"></div>
+            </div>
+            
+            <!-- Customer Files -->
+            <div class="portal-view" id="custFilesView">
+                <div class="portal-header">
+                    <h1 class="portal-title">My Documents</h1>
+                </div>
+                <p style="color:var(--text-light);margin-bottom:20px;">📥 Documents shared by your tax preparer. Click to download.</p>
+                <div class="portal-card">
+                    <div class="portal-card-body" id="custFilesArea">
+                        <div style="text-align:center;padding:40px;color:var(--text-light);">
+                            <p>No documents available yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Upload -->
+            <div class="portal-view" id="custUploadView">
+                <div class="portal-header">
+                    <h1 class="portal-title">Upload Documents</h1>
+                </div>
+                <p style="color:var(--text-light);margin-bottom:20px;">Upload documents for your tax preparer to review (W2s, receipts, etc.)</p>
+                <div class="upload-zone" onclick="document.getElementById('custFileInput').click()">
+                    <input type="file" id="custFileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleCustomerUpload(event)">
+                    <div class="upload-zone-icon">📤</div>
+                    <h4>Click to Upload Documents</h4>
+                    <p>PDF, JPG, PNG, DOC files accepted</p>
+                </div>
+                <div class="portal-card">
+                    <div class="portal-card-header"><span class="portal-card-title">Your Uploaded Files</span></div>
+                    <div class="portal-card-body" id="custUploadedArea">
+                        <p style="color:var(--text-light);text-align:center;">No files uploaded yet.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+    
+    <!-- Client Modal -->
+    <div class="portal-modal-overlay" id="clientModal">
+        <div class="portal-modal lg">
+            <div class="portal-modal-header">
+                <span class="portal-modal-title" id="clientModalTitle">Add Client</span>
+                <button class="portal-modal-close" onclick="closeModal('clientModal')">&times;</button>
+            </div>
+            <div class="portal-modal-body">
+                <input type="hidden" id="clientIdField">
+                <h4 style="margin-bottom:15px;color:var(--accent-light);font-size:0.9rem;">Personal Information</h4>
+                <div class="portal-form-row">
+                    <div class="portal-form-group"><label>First Name *</label><input type="text" class="portal-form-input" id="cfFirstName"></div>
+                    <div class="portal-form-group"><label>Last Name *</label><input type="text" class="portal-form-input" id="cfLastName"></div>
+                </div>
+                <div class="portal-form-row">
+                    <div class="portal-form-group"><label>Email</label><input type="email" class="portal-form-input" id="cfEmail"></div>
+                    <div class="portal-form-group"><label>Phone</label><input type="tel" class="portal-form-input" id="cfPhone"></div>
+                </div>
+                <div class="portal-form-group"><label>Address</label><input type="text" class="portal-form-input" id="cfAddress"></div>
+                <div class="portal-form-row">
+                    <div class="portal-form-group"><label>SSN (Last 4)</label><input type="text" class="portal-form-input" id="cfSSN" maxlength="4"></div>
+                    <div class="portal-form-group"><label>Tax Year</label><select class="portal-form-input portal-form-select" id="cfTaxYear"><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option></select></div>
+                </div>
+                <h4 style="margin:20px 0 15px;color:var(--accent-light);font-size:0.9rem;">Tax Information</h4>
+                <div class="portal-form-row">
+                    <div class="portal-form-group"><label>Adjusted Gross Income</label><input type="number" class="portal-form-input" id="cfAGI"></div>
+                    <div class="portal-form-group"><label>Taxable Income</label><input type="number" class="portal-form-input" id="cfTaxable"></div>
+                </div>
+                <div class="portal-form-row">
+                    <div class="portal-form-group"><label>Total Tax</label><input type="number" class="portal-form-input" id="cfTotalTax"></div>
+                    <div class="portal-form-group"><label>Refund/Owed</label><input type="text" class="portal-form-input" id="cfRefund" placeholder="+1500 or -500"></div>
+                </div>
+                <div class="portal-form-row">
+                    <div class="portal-form-group"><label>Filing Date</label><input type="date" class="portal-form-input" id="cfFilingDate"></div>
+                    <div class="portal-form-group"><label>Status</label><select class="portal-form-input portal-form-select" id="cfStatus"><option value="completed">Completed</option><option value="pending">Pending</option><option value="in-progress">In Progress</option></select></div>
+                </div>
+                <h4 style="margin:20px 0 15px;color:var(--accent-light);font-size:0.9rem;">Payment</h4>
+                <div class="portal-form-row">
+                    <div class="portal-form-group"><label>Service Fee</label><input type="number" class="portal-form-input" id="cfFee"></div>
+                    <div class="portal-form-group"><label>Amount Paid</label><input type="number" class="portal-form-input" id="cfPaid"></div>
+                </div>
+                <div class="portal-form-group"><label>Payment Status</label><select class="portal-form-input portal-form-select" id="cfPayStatus"><option value="pending">Pending</option><option value="paid">Paid</option><option value="partial">Partial</option></select></div>
+                <h4 style="margin:20px 0 15px;color:var(--accent-light);font-size:0.9rem;">Notes</h4>
+                <div class="portal-form-group"><label>Client Notes</label><textarea class="portal-form-input" id="cfNotes" rows="3" style="resize:vertical;min-height:60px;" placeholder="Any additional notes about this client..."></textarea></div>
+                <h4 style="margin:20px 0 15px;color:var(--accent-light);font-size:0.9rem;">📎 Attach Documents (PDF, JPG, PNG)</h4>
+                <div class="upload-zone" onclick="document.getElementById('cfDocUpload').click()" style="padding:20px;margin-bottom:0;">
+                    <input type="file" id="cfDocUpload" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none;">
+                    <div class="upload-zone-icon" style="font-size:2rem;">📤</div>
+                    <h4 style="font-size:0.9rem;">Click to attach tax returns, W2s, receipts</h4>
+                    <p style="font-size:0.8rem;">Files will be shared with the client in their portal</p>
+                </div>
+                <div id="cfDocPreview" style="margin-top:10px;"></div>
+            </div>
+            <div class="portal-modal-footer">
+                <button class="portal-btn portal-btn-outline" onclick="closeModal('clientModal')">Cancel</button>
+                <button class="portal-btn portal-btn-primary" onclick="saveClient()">Save Client</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Client Docs Modal -->
+    <div class="portal-modal-overlay" id="clientDocsModal">
+        <div class="portal-modal lg">
+            <div class="portal-modal-header">
+                <span class="portal-modal-title">📁 <span id="docsClientName">Client</span> - Documents</span>
+                <button class="portal-modal-close" onclick="closeModal('clientDocsModal')">&times;</button>
+            </div>
+            <div class="portal-modal-body">
+                <input type="hidden" id="docsClientId">
+                <div class="upload-zone" onclick="document.getElementById('quickDocUpload').click()" style="padding:25px;">
+                    <input type="file" id="quickDocUpload" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleQuickDocUpload(event)">
+                    <div class="upload-zone-icon">📤</div>
+                    <h4>Upload Documents for This Client</h4>
+                    <p>Tax returns, receipts, W2s - PDF, JPG, PNG files</p>
+                </div>
+                <h4 style="margin:20px 0 10px;color:var(--success);font-size:0.9rem;">📥 Shared with Client (They can download)</h4>
+                <div id="adminSharedDocs" style="background:rgba(0,0,0,0.2);padding:15px;border-radius:8px;min-height:60px;"></div>
+                <h4 style="margin:20px 0 10px;color:var(--accent-light);font-size:0.9rem;">📤 Uploaded by Customer</h4>
+                <div id="customerUploadedDocs" style="background:rgba(0,0,0,0.2);padding:15px;border-radius:8px;min-height:60px;"></div>
+            </div>
+            <div class="portal-modal-footer">
+                <button class="portal-btn portal-btn-outline" onclick="closeModal('clientDocsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Account Modal -->
+    <div class="portal-modal-overlay" id="createAccountModal">
+        <div class="portal-modal">
+            <div class="portal-modal-header">
+                <span class="portal-modal-title">Create Customer Login</span>
+                <button class="portal-modal-close" onclick="closeModal('createAccountModal')">&times;</button>
+            </div>
+            <div class="portal-modal-body">
+                <p style="color:var(--text-light);margin-bottom:15px;font-size:0.85rem;">Create a login for an existing client so they can access the customer portal.</p>
+                <div class="portal-form-group">
+                    <label>Select Client *</label>
+                    <select class="portal-form-input portal-form-select" id="caClientSelect"></select>
+                </div>
+                <div class="portal-form-group">
+                    <label>Login Email *</label>
+                    <input type="email" class="portal-form-input" id="caEmail">
+                </div>
+                <div class="portal-form-group">
+                    <label>Password *</label>
+                    <input type="password" class="portal-form-input" id="caPass" placeholder="Min 6 characters">
+                </div>
+            </div>
+            <div class="portal-modal-footer">
+                <button class="portal-btn portal-btn-outline" onclick="closeModal('createAccountModal')">Cancel</button>
+                <button class="portal-btn portal-btn-primary" onclick="createCustomerAccount()">Create Login</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Link Modal -->
+    <div class="portal-modal-overlay" id="linkModal">
+        <div class="portal-modal">
+            <div class="portal-modal-header">
+                <span class="portal-modal-title">Add Quick Link</span>
+                <button class="portal-modal-close" onclick="closeModal('linkModal')">&times;</button>
+            </div>
+            <div class="portal-modal-body">
+                <input type="hidden" id="linkIdField">
+                <div class="portal-form-group">
+                    <label>Link Name *</label>
+                    <input type="text" class="portal-form-input" id="lfName" placeholder="IRS Website">
+                </div>
+                <div class="portal-form-group">
+                    <label>URL *</label>
+                    <input type="url" class="portal-form-input" id="lfUrl" placeholder="https://www.irs.gov">
+                </div>
+                <div class="portal-form-group">
+                    <label>Description</label>
+                    <input type="text" class="portal-form-input" id="lfDesc" placeholder="Official IRS website">
+                </div>
+            </div>
+            <div class="portal-modal-footer">
+                <button class="portal-btn portal-btn-outline" onclick="closeModal('linkModal')">Cancel</button>
+                <button class="portal-btn portal-btn-primary" onclick="saveLink()">Save Link</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ============ SUPABASE CONFIG ============
+const SUPABASE_URL = 'https://drveurkvtmxzbeiknqpt.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRydmV1cmt2dG14emJlaWtucXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3MDk0MDYsImV4cCI6MjA1ODI4NTQwNn0.MMWN5XiXOxGnkugLYfZT9ZS5aYwkkqFPNZN6AemCnCg';
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ============ STATE ============
+let currentUser = null;
+let currentUserType = null;
+let clients = [];
+let customerAccounts = [];
+let customerUploads = [];
+let clientFiles = [];
+let quickLinks = [];
+let selectedClientId = null;
+let currentFilter = 'all';
+
+// ============ INIT ============
+document.addEventListener('DOMContentLoaded', async () => {
+    setupNavigation();
+    
+    // Check URL params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('register') === '1') {
+        openAuthModal('customer');
+        switchCustomerSubTab('register');
+    }
+    
+    // Check saved session
+    const savedSession = localStorage.getItem('atax_session');
+    if (savedSession) {
+        const session = JSON.parse(savedSession);
+        if (session.type === 'admin') {
+            currentUser = session.user;
+            currentUserType = 'admin';
+            await loadAllData();
+            showAdminPortal();
+        } else if (session.type === 'customer') {
+            currentUser = session.user;
+            currentUserType = 'customer';
+            await loadCustomerData();
+            showCustomerPortal();
+        }
+    }
+    
+    hideLoading();
+});
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+function showLoading(text = 'Loading...') {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.querySelector('.loading-text').textContent = text;
+    overlay.classList.remove('hidden');
+}
+
+// ============ LANDING PAGE ============
+function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+function handleContactSubmit(e) {
+    e.preventDefault();
+    alert('Thank you for your message! We will contact you soon.');
+    e.target.reset();
+}
+
+function toggleMobileMenu() {
+    const links = document.querySelector('.nav-links');
+    links.classList.toggle('mobile-open');
+}
+
+// ============ AUTH MODAL ============
+function openAuthModal(tab = 'customer') {
+    document.getElementById('authModal').classList.add('active');
+    switchAuthTab(tab);
+}
+
+function closeAuthModal() {
+    document.getElementById('authModal').classList.remove('active');
+    clearAuthAlert();
+}
+
+function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tabs .auth-tab[data-tab]').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.auth-tabs .auth-tab[data-tab="${tab}"]`).classList.add('active');
+    document.getElementById('customerAuthForm').classList.toggle('active', tab === 'customer');
+    document.getElementById('adminAuthForm').classList.toggle('active', tab === 'admin');
+    clearAuthAlert();
+}
+
+function switchCustomerSubTab(sub) {
+    document.querySelectorAll('#customerAuthForm .auth-tab[data-sub]').forEach(t => t.classList.remove('active'));
+    document.querySelector(`#customerAuthForm .auth-tab[data-sub="${sub}"]`).classList.add('active');
+    document.getElementById('customerLogin').classList.toggle('hidden', sub !== 'login');
+    document.getElementById('customerRegister').classList.toggle('hidden', sub !== 'register');
+    clearAuthAlert();
+}
+
+function showAuthAlert(msg, type = 'error') {
+    const alert = document.getElementById('authAlert');
+    alert.textContent = msg;
+    alert.className = 'auth-alert ' + type;
+}
+
+function clearAuthAlert() {
+    document.getElementById('authAlert').className = 'auth-alert';
+}
+
+// ============ ADMIN LOGIN ============
+async function adminLogin() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const pass = document.getElementById('adminPass').value;
+    
+    if (!email || !pass) {
+        showAuthAlert('Please enter email and password');
+        return;
+    }
+    
+    showLoading('Signing in...');
+    
+    try {
+        const { data, error } = await db
+            .from('admins')
+            .select('*')
+            .eq('email', email)
+            .eq('password', pass)
+            .single();
+        
+        if (error || !data) {
+            hideLoading();
+            showAuthAlert('Invalid email or password');
+            return;
+        }
+        
+        currentUser = data;
+        currentUserType = 'admin';
+        localStorage.setItem('atax_session', JSON.stringify({ type: 'admin', user: data }));
+        
+        await loadAllData();
+        closeAuthModal();
+        showAdminPortal();
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        showAuthAlert('Login failed: ' + err.message);
+    }
+}
+
+// ============ CUSTOMER LOGIN ============
+async function customerLogin() {
+    const email = document.getElementById('custLoginEmail').value.trim();
+    const pass = document.getElementById('custLoginPass').value;
+    
+    if (!email || !pass) {
+        showAuthAlert('Please enter email and password');
+        return;
+    }
+    
+    showLoading('Signing in...');
+    
+    try {
+        const { data, error } = await db
+            .from('customer_accounts')
+            .select('*')
+            .eq('email', email)
+            .eq('password', pass)
+            .single();
+        
+        if (error || !data) {
+            hideLoading();
+            showAuthAlert('Invalid email or password');
+            return;
+        }
+        
+        if (data.status === 'pending') {
+            hideLoading();
+            showAuthAlert('Your account is pending approval');
+            return;
+        }
+        
+        currentUser = data;
+        currentUserType = 'customer';
+        localStorage.setItem('atax_session', JSON.stringify({ type: 'customer', user: data }));
+        
+        await loadCustomerData();
+        closeAuthModal();
+        showCustomerPortal();
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        showAuthAlert('Login failed: ' + err.message);
+    }
+}
+
+// ============ CUSTOMER REGISTER ============
+async function customerRegister() {
+    const firstName = document.getElementById('regFirstName').value.trim();
+    const lastName = document.getElementById('regLastName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const address = document.getElementById('regAddress').value.trim();
+    const password = document.getElementById('regPassword').value;
+    
+    if (!firstName || !lastName || !email || !password) {
+        showAuthAlert('Please fill in all required fields');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showAuthAlert('Password must be at least 6 characters');
+        return;
+    }
+    
+    showLoading('Creating account...');
+    
+    try {
+        // Check if email exists
+        const { data: existing } = await db
+            .from('customer_accounts')
+            .select('id')
+            .eq('email', email)
+            .single();
+        
+        if (existing) {
+            hideLoading();
+            showAuthAlert('An account with this email already exists');
+            return;
+        }
+        
+        await db.from('customer_accounts').insert({
+            email,
+            password,
+            first_name: firstName,
+            last_name: lastName,
+            phone,
+            address,
+            status: 'pending'
+        });
+        
+        hideLoading();
+        showAuthAlert('Account created! Please wait for admin approval.', 'success');
+        
+        // Clear form
+        ['regFirstName', 'regLastName', 'regEmail', 'regPhone', 'regAddress', 'regPassword'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        
+    } catch (err) {
+        hideLoading();
+        showAuthAlert('Registration failed: ' + err.message);
+    }
+}
+
+// ============ LOAD DATA ============
+async function loadAllData() {
+    try {
+        const [clientsRes, accountsRes, uploadsRes, filesRes, linksRes] = await Promise.all([
+            db.from('clients').select('*').order('created_at', { ascending: false }),
+            db.from('customer_accounts').select('*').order('created_at', { ascending: false }),
+            db.from('customer_uploads').select('*').order('uploaded_at', { ascending: false }),
+            db.from('client_files').select('*').order('uploaded_at', { ascending: false }),
+            db.from('quick_links').select('*').order('created_at', { ascending: false })
+        ]);
+        
+        clients = clientsRes.data || [];
+        customerAccounts = accountsRes.data || [];
+        customerUploads = uploadsRes.data || [];
+        clientFiles = filesRes.data || [];
+        quickLinks = linksRes.data || [];
+    } catch (err) {
+        console.error('Error loading data:', err);
+    }
+}
+
+async function loadCustomerData() {
+    if (!currentUser || !currentUser.client_id) return;
+    
+    try {
+        const { data } = await db
+            .from('clients')
+            .select('*')
+            .eq('id', currentUser.client_id)
+            .single();
+        
+        if (data) {
+            currentUser.clientData = data;
+        }
+        
+        // Load files shared with customer
+        const { data: files } = await db
+            .from('client_files')
+            .select('*')
+            .eq('client_id', currentUser.client_id);
+        
+        currentUser.files = files || [];
+        
+        // Load customer's own uploads
+        const { data: uploads } = await db
+            .from('customer_uploads')
+            .select('*')
+            .eq('customer_id', currentUser.id);
+        
+        currentUser.uploads = uploads || [];
+        
+    } catch (err) {
+        console.error('Error loading customer data:', err);
+    }
+}
+
+// ============ SHOW PORTALS ============
+function showAdminPortal() {
+    document.getElementById('landingPage').style.display = 'none';
+    document.getElementById('adminPortal').classList.add('active');
+    document.getElementById('customerPortal').classList.remove('active');
+    document.getElementById('adminDisplayName').textContent = currentUser.email.split('@')[0];
+    document.getElementById('regLinkDisplay').textContent = window.location.origin + window.location.pathname + '?register=1';
+    history.pushState({ portal: 'admin' }, '', '');
+    renderDashboard();
+}
+
+function showCustomerPortal() {
+    document.getElementById('landingPage').style.display = 'none';
+    document.getElementById('customerPortal').classList.add('active');
+    document.getElementById('adminPortal').classList.remove('active');
+    document.getElementById('custPortalAvatar').textContent = (currentUser.first_name || 'C')[0].toUpperCase();
+    document.getElementById('custPortalName').textContent = currentUser.first_name + ' ' + currentUser.last_name;
+    document.getElementById('custWelcomeMsg').textContent = `Welcome, ${currentUser.first_name}!`;
+    history.pushState({ portal: 'customer' }, '', '');
+    renderCustomerDashboard();
+}
+
+function logout() {
+    currentUser = null;
+    currentUserType = null;
+    localStorage.removeItem('atax_session');
+    document.getElementById('landingPage').style.display = 'block';
+    document.getElementById('adminPortal').classList.remove('active');
+    document.getElementById('customerPortal').classList.remove('active');
+    updateNavButtons();
+    window.scrollTo(0, 0);
+}
+
+function goToWebsite() {
+    // Go back to landing page without logging out
+    document.getElementById('landingPage').style.display = 'block';
+    document.getElementById('adminPortal').classList.remove('active');
+    document.getElementById('customerPortal').classList.remove('active');
+    updateNavButtons();
+    window.scrollTo(0, 0);
+}
+
+function returnToPortal() {
+    if (currentUserType === 'admin') {
+        showAdminPortal();
+    } else if (currentUserType === 'customer') {
+        showCustomerPortal();
+    }
+}
+
+function updateNavButtons() {
+    const isLoggedIn = !!currentUserType;
+    document.getElementById('navCustLogin').style.display = isLoggedIn ? 'none' : '';
+    document.getElementById('navAdminLogin').style.display = isLoggedIn ? 'none' : '';
+    document.getElementById('navReturnPortal').style.display = isLoggedIn ? '' : 'none';
+}
+
+// ============ NAVIGATION ============
+function setupNavigation() {
+    document.querySelectorAll('.portal-nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const view = item.dataset.view;
+            const portal = item.dataset.portal;
+            
+            if (portal === 'customer') {
+                document.querySelectorAll('#customerPortal .portal-nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('#customerPortal .portal-view').forEach(v => v.classList.remove('active'));
+            } else {
+                document.querySelectorAll('#adminPortal .portal-nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('#adminPortal .portal-view').forEach(v => v.classList.remove('active'));
+            }
+            
+            item.classList.add('active');
+            document.getElementById(view + 'View').classList.add('active');
+            
+            // Render views
+            if (view === 'adminDashboard') renderDashboard();
+            if (view === 'adminPending') renderPendingApprovals();
+            if (view === 'adminUploads') renderCustomerUploads();
+            if (view === 'adminFiles') renderFilesView();
+            if (view === 'adminLinks') renderLinks();
+            if (view === 'custFiles') renderCustomerFiles();
+            if (view === 'custUpload') renderCustomerUploadedFiles();
+        });
+    });
+}
+
+// ============ MOBILE PORTAL NAV ============
+function openMobileNav(portalType) {
+    const navId = portalType === 'admin' ? 'adminMobileNav' : 'custMobileNav';
+    document.getElementById(navId).classList.add('active');
+}
+
+function closeMobileNav(portalType) {
+    const navId = portalType === 'admin' ? 'adminMobileNav' : 'custMobileNav';
+    document.getElementById(navId).classList.remove('active');
+}
+
+function mobileNavTo(view, portalType) {
+    // Close mobile nav
+    closeMobileNav(portalType);
+    
+    // Update active states
+    const portalId = portalType === 'admin' ? 'adminPortal' : 'customerPortal';
+    const mobileNavId = portalType === 'admin' ? 'adminMobileNav' : 'custMobileNav';
+    
+    // Desktop sidebar
+    document.querySelectorAll(`#${portalId} .portal-nav-item`).forEach(n => n.classList.remove('active'));
+    document.querySelectorAll(`#${portalId} .portal-view`).forEach(v => v.classList.remove('active'));
+    
+    // Find and activate sidebar item
+    const sidebarItem = document.querySelector(`#${portalId} .portal-nav-item[data-view="${view}"]`);
+    if (sidebarItem) sidebarItem.classList.add('active');
+    
+    // Mobile nav active states
+    document.querySelectorAll(`#${mobileNavId} .portal-mobile-nav-item`).forEach(n => n.classList.remove('active'));
+    event.target.closest('.portal-mobile-nav-item')?.classList.add('active');
+    
+    // Show view
+    document.getElementById(view + 'View').classList.add('active');
+    
+    // Render views
+    if (view === 'adminDashboard') renderDashboard();
+    if (view === 'adminPending') renderPendingApprovals();
+    if (view === 'adminUploads') renderCustomerUploads();
+    if (view === 'adminFiles') renderFilesView();
+    if (view === 'adminLinks') renderLinks();
+    if (view === 'adminSettings') {}
+    if (view === 'custDashboard') renderCustomerDashboard();
+    if (view === 'custFiles') renderCustomerFiles();
+    if (view === 'custUpload') renderCustomerUploadedFiles();
+    
+    window.scrollTo(0, 0);
+}
+
+// ============ BROWSER BACK BUTTON SUPPORT ============
+window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.portal) {
+        // Stay in portal, don't log out
+    } else {
+        // If we're in a portal and user hits back, go to landing page but keep session
+        if (currentUserType) {
+            document.getElementById('landingPage').style.display = 'block';
+            document.getElementById('adminPortal').classList.remove('active');
+            document.getElementById('customerPortal').classList.remove('active');
+        }
+    }
+});
+
+// ============ ADMIN DASHBOARD ============
+function renderDashboard() {
+    renderStats();
+    renderClientsTable();
+    updateBadges();
+}
+
+function renderStats() {
+    const total = clients.length;
+    const completed = clients.filter(c => c.status === 'completed').length;
+    const pending = clients.filter(c => c.status === 'pending').length;
+    const totalRefunds = clients.reduce((sum, c) => {
+        const val = parseFloat(c.refund_owed?.replace(/[^0-9.-]/g, '') || 0);
+        return sum + (val > 0 ? val : 0);
+    }, 0);
+    
+    document.getElementById('adminStats').innerHTML = `
+        <div class="portal-stat"><div class="portal-stat-icon blue">👥</div><div class="portal-stat-value">${total}</div><div class="portal-stat-label">Total Clients</div></div>
+        <div class="portal-stat"><div class="portal-stat-icon green">✓</div><div class="portal-stat-value">${completed}</div><div class="portal-stat-label">Completed</div></div>
+        <div class="portal-stat"><div class="portal-stat-icon gold">⏳</div><div class="portal-stat-value">${pending}</div><div class="portal-stat-label">Pending</div></div>
+        <div class="portal-stat"><div class="portal-stat-icon green">💰</div><div class="portal-stat-value">$${totalRefunds.toLocaleString()}</div><div class="portal-stat-label">Total Refunds</div></div>
+    `;
+}
+
+function renderClientsTable() {
+    const search = document.getElementById('clientSearch')?.value?.toLowerCase() || '';
+    let filtered = clients.filter(c => {
+        const name = (c.first_name + ' ' + c.last_name).toLowerCase();
+        const matchesSearch = name.includes(search) || (c.email || '').toLowerCase().includes(search);
+        const matchesFilter = currentFilter === 'all' || c.status === currentFilter;
+        return matchesSearch && matchesFilter;
+    });
+    
+    const tbody = document.getElementById('clientsTableBody');
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-light);padding:30px;">No clients found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = filtered.map(c => {
+        const initials = ((c.first_name || '')[0] + (c.last_name || '')[0]).toUpperCase();
+        const statusClass = c.status === 'completed' ? 'green' : c.status === 'pending' ? 'yellow' : 'blue';
+        const payClass = c.payment_status === 'paid' ? 'green' : c.payment_status === 'partial' ? 'yellow' : 'red';
+        const income = c.adjusted_income ? '$' + Number(c.adjusted_income).toLocaleString() : '-';
+        const fileCount = clientFiles.filter(f => f.client_id === c.id).length;
+        const notesPreview = c.notes ? (c.notes.length > 30 ? c.notes.substring(0, 30) + '...' : c.notes) : '-';
+        
+        return `
+            <tr>
+                <td><div class="client-row"><div class="client-avatar">${initials}</div><div class="client-info"><h4>${c.first_name} ${c.last_name}</h4><span>${c.email || c.phone || '-'}</span></div></div></td>
+                <td>${c.tax_year || '2025'}</td>
+                <td>${income}</td>
+                <td>${c.refund_owed || '-'}</td>
+                <td><span class="portal-badge ${statusClass}">${c.status || 'pending'}</span></td>
+                <td><span class="portal-badge ${payClass}">${c.payment_status || 'pending'}</span></td>
+                <td style="font-size:0.8rem;color:var(--text-light);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(c.notes || '').replace(/"/g, '&quot;')}">${notesPreview}</td>
+                <td><div class="action-btns">
+                    <button class="action-btn docs" onclick="openClientDocs('${c.id}')" title="Documents (${fileCount})">📁${fileCount > 0 ? '<span style="font-size:0.6rem;position:absolute;margin-left:-4px;margin-top:-8px;background:var(--accent);border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;">'+fileCount+'</span>' : ''}</button>
+                    <button class="action-btn" onclick="editClient('${c.id}')" title="Edit">✏️</button>
+                    <button class="action-btn delete" onclick="deleteClient('${c.id}')" title="Delete">🗑️</button>
+                </div></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterClients() {
+    renderClientsTable();
+}
+
+function setFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.classList.toggle('portal-btn-primary', btn.dataset.filter === filter);
+        btn.classList.toggle('portal-btn-outline', btn.dataset.filter !== filter);
+    });
+    renderClientsTable();
+}
+
+function updateBadges() {
+    const pendingCount = customerAccounts.filter(a => a.status === 'pending').length;
+    document.getElementById('pendingBadge').textContent = pendingCount;
+    document.getElementById('pendingBadge').style.display = pendingCount > 0 ? 'inline' : 'none';
+    
+    document.getElementById('uploadsBadge').textContent = customerUploads.length;
+}
+
+// ============ CLIENT CRUD ============
+function openClientModal(id = null) {
+    document.getElementById('clientIdField').value = id || '';
+    document.getElementById('clientModalTitle').textContent = id ? 'Edit Client' : 'Add Client';
+    
+    // Reset doc upload
+    document.getElementById('cfDocUpload').value = '';
+    document.getElementById('cfDocPreview').innerHTML = '';
+    
+    // Set up doc upload preview
+    document.getElementById('cfDocUpload').onchange = function() {
+        const preview = document.getElementById('cfDocPreview');
+        if (this.files.length > 0) {
+            preview.innerHTML = Array.from(this.files).map(f => `
+                <div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(56,161,105,0.1);border-radius:6px;margin-bottom:5px;">
+                    <span>${f.name.endsWith('.pdf') ? '📕' : '🖼️'}</span>
+                    <span style="font-size:0.85rem;flex:1;">${f.name}</span>
+                    <span style="font-size:0.7rem;color:var(--text-light);">${(f.size / 1024).toFixed(0)} KB</span>
+                </div>
+            `).join('');
+        } else {
+            preview.innerHTML = '';
+        }
+    };
+    
+    if (id) {
+        const c = clients.find(x => x.id === id);
+        if (c) {
+            document.getElementById('cfFirstName').value = c.first_name || '';
+            document.getElementById('cfLastName').value = c.last_name || '';
+            document.getElementById('cfEmail').value = c.email || '';
+            document.getElementById('cfPhone').value = c.phone || '';
+            document.getElementById('cfAddress').value = c.address || '';
+            document.getElementById('cfSSN').value = c.ssn || '';
+            document.getElementById('cfTaxYear').value = c.tax_year || '2025';
+            document.getElementById('cfAGI').value = c.adjusted_income || '';
+            document.getElementById('cfTaxable').value = c.taxable_income || '';
+            document.getElementById('cfTotalTax').value = c.total_tax || '';
+            document.getElementById('cfRefund').value = c.refund_owed || '';
+            document.getElementById('cfFilingDate').value = c.filing_date || '';
+            document.getElementById('cfStatus').value = c.status || 'pending';
+            document.getElementById('cfFee').value = c.service_fee || '';
+            document.getElementById('cfPaid').value = c.amount_paid || '';
+            document.getElementById('cfPayStatus').value = c.payment_status || 'pending';
+            document.getElementById('cfNotes').value = c.notes || '';
+        }
+    } else {
+        ['cfFirstName','cfLastName','cfEmail','cfPhone','cfAddress','cfSSN','cfAGI','cfTaxable','cfTotalTax','cfRefund','cfFilingDate','cfFee','cfPaid'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        document.getElementById('cfTaxYear').value = '2025';
+        document.getElementById('cfStatus').value = 'pending';
+        document.getElementById('cfPayStatus').value = 'pending';
+        document.getElementById('cfNotes').value = '';
+    }
+    
+    openModal('clientModal');
+}
+
+function editClient(id) {
+    openClientModal(id);
+}
+
+async function saveClient() {
+    const id = document.getElementById('clientIdField').value;
+    const data = {
+        first_name: document.getElementById('cfFirstName').value.trim(),
+        last_name: document.getElementById('cfLastName').value.trim(),
+        email: document.getElementById('cfEmail').value.trim(),
+        phone: document.getElementById('cfPhone').value.trim(),
+        address: document.getElementById('cfAddress').value.trim(),
+        ssn: document.getElementById('cfSSN').value.trim(),
+        tax_year: document.getElementById('cfTaxYear').value,
+        adjusted_income: document.getElementById('cfAGI').value || null,
+        taxable_income: document.getElementById('cfTaxable').value || null,
+        total_tax: document.getElementById('cfTotalTax').value || null,
+        refund_owed: document.getElementById('cfRefund').value.trim(),
+        filing_date: document.getElementById('cfFilingDate').value || null,
+        status: document.getElementById('cfStatus').value,
+        service_fee: document.getElementById('cfFee').value || null,
+        amount_paid: document.getElementById('cfPaid').value || null,
+        payment_status: document.getElementById('cfPayStatus').value,
+        notes: document.getElementById('cfNotes').value.trim()
+    };
+    
+    if (!data.first_name || !data.last_name) {
+        alert('First and last name are required');
+        return;
+    }
+    
+    showLoading('Saving client...');
+    
+    try {
+        let clientId = id;
+        
+        if (id) {
+            await db.from('clients').update(data).eq('id', id);
+        } else {
+            const { data: newClient, error } = await db.from('clients').insert(data).select().single();
+            if (error) throw error;
+            clientId = newClient.id;
+        }
+        
+        // Upload any attached documents
+        const fileInput = document.getElementById('cfDocUpload');
+        if (fileInput.files.length > 0 && clientId) {
+            showLoading('Uploading documents...');
+            for (const file of Array.from(fileInput.files)) {
+                const reader = new FileReader();
+                await new Promise((resolve, reject) => {
+                    reader.onload = async (ev) => {
+                        try {
+                            await db.from('client_files').insert({
+                                client_id: clientId,
+                                file_name: file.name,
+                                file_type: file.type,
+                                file_size: file.size,
+                                file_data: ev.target.result
+                            });
+                            resolve();
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    reader.onerror = () => reject(new Error('File read failed'));
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+        
+        await loadAllData();
+        closeModal('clientModal');
+        renderDashboard();
+        hideLoading();
+        alert(id ? 'Client updated!' : 'Client added successfully!');
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+async function deleteClient(id) {
+    if (!confirm('Delete this client?')) return;
+    showLoading('Deleting...');
+    try {
+        await db.from('clients').delete().eq('id', id);
+        await loadAllData();
+        renderDashboard();
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+// ============ CLIENT DOCS ============
+async function openClientDocs(clientId) {
+    document.getElementById('docsClientId').value = clientId;
+    const client = clients.find(c => c.id === clientId);
+    document.getElementById('docsClientName').textContent = client ? `${client.first_name} ${client.last_name}` : 'Client';
+    openModal('clientDocsModal');
+    await renderClientDocsModal(clientId);
+}
+
+async function renderClientDocsModal(clientId) {
+    // Admin shared files
+    const adminFiles = clientFiles.filter(f => f.client_id === clientId);
+    const adminDocsArea = document.getElementById('adminSharedDocs');
+    
+    if (adminFiles.length === 0) {
+        adminDocsArea.innerHTML = '<p style="color:var(--text-light);margin:0;">No documents shared yet. Upload above to share with this client.</p>';
+    } else {
+        adminDocsArea.innerHTML = adminFiles.map(f => {
+            const fid = registerFile(f.file_data, f.file_name);
+            return `
+            <div class="file-row">
+                <span class="file-row-icon">${getFileIcon(f.file_name)}</span>
+                <div class="file-row-info">
+                    <div class="file-row-name">${f.file_name}</div>
+                    <div class="file-row-meta">${new Date(f.uploaded_at).toLocaleDateString()}</div>
+                </div>
+                <div class="file-row-actions">
+                    <button class="portal-btn portal-btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="viewFileById('${fid}')">👁️</button>
+                    <button class="portal-btn portal-btn-primary" style="padding:6px 12px;font-size:0.75rem;" onclick="downloadFileById('${fid}')">⬇️</button>
+                    <button class="portal-btn" style="padding:6px 12px;font-size:0.75rem;background:var(--danger);" onclick="deleteClientFile('${f.id}')">🗑️</button>
+                </div>
+            </div>
+        `}).join('');
+    }
+    
+    // Customer uploads
+    const custAcct = customerAccounts.find(a => a.client_id === clientId);
+    const custUploads = custAcct ? customerUploads.filter(u => u.customer_id === custAcct.id) : [];
+    const custDocsArea = document.getElementById('customerUploadedDocs');
+    
+    if (custUploads.length === 0) {
+        custDocsArea.innerHTML = '<p style="color:var(--text-light);margin:0;">No documents uploaded by customer yet.</p>';
+    } else {
+        custDocsArea.innerHTML = custUploads.map(u => {
+            const fid = registerFile(u.file_data, u.file_name);
+            return `
+            <div class="file-row">
+                <span class="file-row-icon">${getFileIcon(u.file_name)}</span>
+                <div class="file-row-info">
+                    <div class="file-row-name">${u.file_name}</div>
+                    <div class="file-row-meta">${new Date(u.uploaded_at).toLocaleDateString()}</div>
+                </div>
+                <div class="file-row-actions">
+                    <button class="portal-btn portal-btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="viewFileById('${fid}')">👁️</button>
+                    <button class="portal-btn portal-btn-primary" style="padding:6px 12px;font-size:0.75rem;" onclick="downloadFileById('${fid}')">⬇️</button>
+                </div>
+            </div>
+        `}).join('');
+    }
+}
+
+function getFileIcon(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    if (ext === 'pdf') return '📕';
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return '🖼️';
+    if (['doc', 'docx'].includes(ext)) return '📄';
+    return '📁';
+}
+
+// SAFE FILE REGISTRY - avoids putting base64 data in onclick attributes
+const fileRegistry = {};
+let fileIdCounter = 0;
+
+function registerFile(fileData, fileName) {
+    const fid = 'f_' + (fileIdCounter++);
+    fileRegistry[fid] = { data: fileData, name: fileName };
+    return fid;
+}
+
+function viewFileById(fid) {
+    const f = fileRegistry[fid];
+    if (!f || !f.data) {
+        alert('File data not available. Please contact ATAX Manteca for assistance.');
+        return;
+    }
+    try {
+        if (f.data.startsWith('data:image')) {
+            const win = window.open('', '_blank');
+            if (win) {
+                win.document.write('<html><head><title>' + f.name + '</title><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a202c;}</style></head><body><img src="' + f.data + '" style="max-width:100%;max-height:100vh;"></body></html>');
+                win.document.close();
+            }
+        } else if (f.data.startsWith('data:application/pdf')) {
+            const win = window.open('', '_blank');
+            if (win) {
+                win.document.write('<html><head><title>' + f.name + '</title></head><body style="margin:0;"><iframe src="' + f.data + '" style="width:100%;height:100vh;border:none;"></iframe></body></html>');
+                win.document.close();
+            }
+        } else {
+            downloadFileById(fid);
+        }
+    } catch (err) {
+        alert('Error opening file. Try downloading instead.');
+    }
+}
+
+function downloadFileById(fid) {
+    const f = fileRegistry[fid];
+    if (!f || !f.data) {
+        alert('File data not available. Please contact ATAX Manteca for assistance.');
+        return;
+    }
+    try {
+        const a = document.createElement('a');
+        a.href = f.data;
+        a.download = f.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    } catch (err) {
+        alert('Error downloading file: ' + err.message);
+    }
+}
+
+async function handleQuickDocUpload(e) {
+    const files = Array.from(e.target.files);
+    const clientId = document.getElementById('docsClientId').value;
+    if (!clientId || files.length === 0) return;
+    
+    showLoading('Uploading documents...');
+    
+    try {
+        for (const file of files) {
+            const reader = new FileReader();
+            await new Promise((resolve) => {
+                reader.onload = async (ev) => {
+                    await db.from('client_files').insert({
+                        client_id: clientId,
+                        file_name: file.name,
+                        file_type: file.type,
+                        file_size: file.size,
+                        file_data: ev.target.result
+                    });
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        await loadAllData();
+        await renderClientDocsModal(clientId);
+        document.getElementById('quickDocUpload').value = '';
+        hideLoading();
+        alert(`${files.length} document(s) uploaded successfully!`);
+    } catch (err) {
+        hideLoading();
+        alert('Error uploading: ' + err.message);
+    }
+}
+
+async function deleteClientFile(id) {
+    if (!confirm('Delete this file?')) return;
+    showLoading('Deleting...');
+    try {
+        await db.from('client_files').delete().eq('id', id);
+        await loadAllData();
+        const clientId = document.getElementById('docsClientId').value;
+        if (clientId) await renderClientDocsModal(clientId);
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+// OLD viewFile/downloadFile replaced by registry-based viewFileById/downloadFileById above
+
+// ============ MODAL FUNCTIONS (CRITICAL FIX) ============
+function openModal(id) {
+    document.getElementById(id).classList.add('active');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+// ============ FILES VIEW ============
+function renderFilesView() {
+    const grid = document.getElementById('fileClientsGrid');
+    grid.innerHTML = clients.map(c => {
+        const initials = ((c.first_name || '')[0] + (c.last_name || '')[0]).toUpperCase();
+        const fileCount = clientFiles.filter(f => f.client_id === c.id).length;
+        return `
+            <div class="file-card ${selectedClientId === c.id ? 'active' : ''}" onclick="selectFileClient('${c.id}')">
+                <div class="file-card-icon" style="font-size:1.5rem;background:linear-gradient(135deg, var(--accent), var(--secondary));width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">${initials}</div>
+                <h4>${c.first_name} ${c.last_name}</h4>
+                <span>${fileCount} files</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function selectFileClient(id) {
+    selectedClientId = id;
+    document.getElementById('selectedClientFiles').classList.remove('hidden');
+    const client = clients.find(c => c.id === id);
+    document.getElementById('selectedClientTitle').textContent = client ? `${client.first_name} ${client.last_name}'s Files` : 'Files';
+    renderFilesView();
+    renderSelectedClientFiles();
+}
+
+function renderSelectedClientFiles() {
+    const files = clientFiles.filter(f => f.client_id === selectedClientId);
+    const area = document.getElementById('selectedClientFilesList');
+    
+    if (files.length === 0) {
+        area.innerHTML = '<p style="color:var(--text-light);text-align:center;">No files yet. Upload documents above.</p>';
+    } else {
+        area.innerHTML = files.map(f => {
+            const fid = registerFile(f.file_data, f.file_name);
+            return `
+            <div class="file-row">
+                <span class="file-row-icon">${getFileIcon(f.file_name)}</span>
+                <div class="file-row-info">
+                    <div class="file-row-name">${f.file_name}</div>
+                    <div class="file-row-meta">${new Date(f.uploaded_at).toLocaleDateString()}</div>
+                </div>
+                <div class="file-row-actions">
+                    <button class="portal-btn portal-btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="viewFileById('${fid}')">👁️ View</button>
+                    <button class="portal-btn portal-btn-primary" style="padding:6px 12px;font-size:0.75rem;" onclick="downloadFileById('${fid}')">⬇️ Download</button>
+                    <button class="portal-btn" style="padding:6px 12px;font-size:0.75rem;background:var(--danger);" onclick="deleteClientFile('${f.id}')">🗑️</button>
+                </div>
+            </div>
+        `}).join('');
+    }
+}
+
+async function handleAdminFileUpload(e) {
+    const files = Array.from(e.target.files);
+    if (!selectedClientId || files.length === 0) return;
+    
+    showLoading('Uploading files...');
+    
+    try {
+        for (const file of files) {
+            const reader = new FileReader();
+            await new Promise((resolve) => {
+                reader.onload = async (ev) => {
+                    await db.from('client_files').insert({
+                        client_id: selectedClientId,
+                        file_name: file.name,
+                        file_type: file.type,
+                        file_size: file.size,
+                        file_data: ev.target.result
+                    });
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        await loadAllData();
+        renderSelectedClientFiles();
+        renderFilesView();
+        document.getElementById('adminFileUpload').value = '';
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        alert('Error uploading: ' + err.message);
+    }
+}
+
+// ============ PENDING APPROVALS ============
+async function renderPendingApprovals() {
+    await loadAllData();
+    const pending = customerAccounts.filter(a => a.status === 'pending');
+    const area = document.getElementById('pendingListArea');
+    
+    if (pending.length === 0) {
+        area.innerHTML = '<div class="portal-card"><div class="portal-card-body" style="text-align:center;padding:40px;"><p style="color:var(--text-light);">No pending approvals</p></div></div>';
+        return;
+    }
+    
+    area.innerHTML = pending.map(a => `
+        <div class="portal-card" style="margin-bottom:15px;">
+            <div class="portal-card-header">
+                <span class="portal-card-title">${a.first_name} ${a.last_name}</span>
+                <span style="font-size:0.75rem;color:var(--text-light);">${new Date(a.created_at).toLocaleDateString()}</span>
+            </div>
+            <div class="portal-card-body">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));gap:15px;margin-bottom:15px;">
+                    <div><span style="font-size:0.7rem;color:var(--text-light);">Email</span><br>${a.email}</div>
+                    <div><span style="font-size:0.7rem;color:var(--text-light);">Phone</span><br>${a.phone || '-'}</div>
+                    <div><span style="font-size:0.7rem;color:var(--text-light);">Address</span><br>${a.address || '-'}</div>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button class="portal-btn portal-btn-success" onclick="approveAccount('${a.id}')">✓ Approve</button>
+                    <button class="portal-btn" style="background:var(--danger);" onclick="rejectAccount('${a.id}')">✕ Reject</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function approveAccount(id) {
+    showLoading('Approving...');
+    try {
+        await db.from('customer_accounts').update({ status: 'approved' }).eq('id', id);
+        await loadAllData();
+        renderPendingApprovals();
+        updateBadges();
+        hideLoading();
+        alert('Account approved!');
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+async function rejectAccount(id) {
+    if (!confirm('Reject this account?')) return;
+    showLoading('Rejecting...');
+    try {
+        await db.from('customer_accounts').delete().eq('id', id);
+        await loadAllData();
+        renderPendingApprovals();
+        updateBadges();
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+// ============ CUSTOMER UPLOADS VIEW ============
+async function renderCustomerUploads() {
+    await loadAllData();
+    const area = document.getElementById('customerUploadsArea');
+    
+    if (customerUploads.length === 0) {
+        area.innerHTML = '<div class="portal-card"><div class="portal-card-body" style="text-align:center;padding:40px;"><p style="color:var(--text-light);">No customer uploads yet</p></div></div>';
+        return;
+    }
+    
+    // Group by customer
+    const grouped = {};
+    customerUploads.forEach(u => {
+        if (!grouped[u.customer_id]) grouped[u.customer_id] = [];
+        grouped[u.customer_id].push(u);
+    });
+    
+    let html = '';
+    for (const custId in grouped) {
+        const acct = customerAccounts.find(a => a.id === custId);
+        const name = acct ? `${acct.first_name} ${acct.last_name}` : 'Unknown Customer';
+        const uploads = grouped[custId];
+        
+        html += `
+            <div class="portal-card" style="margin-bottom:15px;">
+                <div class="portal-card-header">
+                    <span class="portal-card-title">👤 ${name}</span>
+                    <span class="portal-badge blue">${uploads.length} files</span>
+                </div>
+                <div class="portal-card-body">
+                    ${uploads.map(u => {
+                        const fid = registerFile(u.file_data, u.file_name);
+                        return `
+                        <div class="file-row">
+                            <span class="file-row-icon">${getFileIcon(u.file_name)}</span>
+                            <div class="file-row-info">
+                                <div class="file-row-name">${u.file_name}</div>
+                                <div class="file-row-meta">${new Date(u.uploaded_at).toLocaleDateString()}</div>
+                            </div>
+                            <div class="file-row-actions">
+                                <button class="portal-btn portal-btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="viewFileById('${fid}')">👁️</button>
+                                <button class="portal-btn portal-btn-primary" style="padding:6px 12px;font-size:0.75rem;" onclick="downloadFileById('${fid}')">⬇️</button>
+                            </div>
+                        </div>
+                    `}).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    area.innerHTML = html;
+}
+
+// ============ QUICK LINKS ============
+function renderLinks() {
+    const grid = document.getElementById('linksGrid');
+    
+    if (quickLinks.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-light);">No quick links yet. Add one above.</div>';
+        return;
+    }
+    
+    grid.innerHTML = quickLinks.map(l => `
+        <div class="file-card" onclick="window.open('${l.url}', '_blank')">
+            <div class="file-card-icon">🔗</div>
+            <h4>${l.name}</h4>
+            <span>${l.description || l.url}</span>
+        </div>
+    `).join('');
+}
+
+function openLinkModal() {
+    document.getElementById('linkIdField').value = '';
+    document.getElementById('lfName').value = '';
+    document.getElementById('lfUrl').value = '';
+    document.getElementById('lfDesc').value = '';
+    openModal('linkModal');
+}
+
+async function saveLink() {
+    const data = {
+        name: document.getElementById('lfName').value.trim(),
+        url: document.getElementById('lfUrl').value.trim(),
+        description: document.getElementById('lfDesc').value.trim()
+    };
+    
+    if (!data.name || !data.url) {
+        alert('Name and URL are required');
+        return;
+    }
+    
+    showLoading('Saving...');
+    
+    try {
+        await db.from('quick_links').insert(data);
+        await loadAllData();
+        closeModal('linkModal');
+        renderLinks();
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+// ============ CREATE CUSTOMER ACCOUNT ============
+function openCreateAccountModal() {
+    const select = document.getElementById('caClientSelect');
+    select.innerHTML = '<option value="">-- Select a client --</option>' + 
+        clients.map(c => `<option value="${c.id}">${c.first_name} ${c.last_name}</option>`).join('');
+    document.getElementById('caEmail').value = '';
+    document.getElementById('caPass').value = '';
+    openModal('createAccountModal');
+}
+
+async function createCustomerAccount() {
+    const clientId = document.getElementById('caClientSelect').value;
+    const email = document.getElementById('caEmail').value.trim();
+    const pass = document.getElementById('caPass').value;
+    
+    if (!clientId || !email || !pass) {
+        alert('All fields are required');
+        return;
+    }
+    
+    if (pass.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+    }
+    
+    const client = clients.find(c => c.id === clientId);
+    if (!client) return;
+    
+    showLoading('Creating login...');
+    
+    try {
+        const { data: existing } = await db
+            .from('customer_accounts')
+            .select('id')
+            .eq('email', email)
+            .single();
+        
+        if (existing) {
+            hideLoading();
+            alert('An account with this email already exists');
+            return;
+        }
+        
+        await db.from('customer_accounts').insert({
+            email,
+            password: pass,
+            first_name: client.first_name,
+            last_name: client.last_name,
+            phone: client.phone,
+            address: client.address,
+            status: 'approved',
+            client_id: clientId
+        });
+        
+        await loadAllData();
+        closeModal('createAccountModal');
+        hideLoading();
+        alert('Customer login created successfully!');
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+// ============ SETTINGS ============
+async function changeAdminPassword() {
+    const pass = document.getElementById('newAdminPass').value;
+    if (!pass || pass.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+    }
+    
+    showLoading('Updating...');
+    
+    try {
+        await db.from('admins').update({ password: pass }).eq('id', currentUser.id);
+        hideLoading();
+        alert('Password updated!');
+        document.getElementById('newAdminPass').value = '';
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+function copyRegLink() {
+    const link = document.getElementById('regLinkDisplay').textContent;
+    navigator.clipboard.writeText(link);
+    alert('Link copied!');
+}
+
+async function downloadBackup() {
+    showLoading('Creating backup...');
+    try {
+        const backup = { clients, customerAccounts, customerUploads, clientFiles, quickLinks, timestamp: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `atax_backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+async function restoreBackup(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!confirm('This will add data from the backup. Continue?')) return;
+    
+    showLoading('Restoring...');
+    
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        // Simple restore - just reload
+        alert('Backup file loaded. Please manually import if needed.');
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        alert('Error reading backup: ' + err.message);
+    }
+}
+
+// ============ CUSTOMER PORTAL ============
+function renderCustomerDashboard() {
+    const cd = currentUser.clientData;
+    const area = document.getElementById('custInfoArea');
+    
+    if (!cd) {
+        area.innerHTML = '<div class="portal-card"><div class="portal-card-body" style="text-align:center;padding:30px;"><p style="color:var(--text-light);">Your account is not yet linked to a client record. Please contact your tax preparer.</p></div></div>';
+        return;
+    }
+    
+    area.innerHTML = `
+        <div class="info-card"><div class="info-card-label">Tax Year</div><div class="info-card-value">${cd.tax_year || '2025'}</div></div>
+        <div class="info-card"><div class="info-card-label">Filing Status</div><div class="info-card-value"><span class="portal-badge ${cd.status === 'completed' ? 'green' : 'yellow'}">${cd.status || 'Pending'}</span></div></div>
+        <div class="info-card"><div class="info-card-label">Adjusted Gross Income</div><div class="info-card-value">${cd.adjusted_income ? '$' + Number(cd.adjusted_income).toLocaleString() : '-'}</div></div>
+        <div class="info-card"><div class="info-card-label">Refund/Owed</div><div class="info-card-value">${cd.refund_owed || '-'}</div></div>
+        <div class="info-card"><div class="info-card-label">Filing Date</div><div class="info-card-value">${cd.filing_date || '-'}</div></div>
+        <div class="info-card"><div class="info-card-label">Service Fee</div><div class="info-card-value">${cd.service_fee ? '$' + cd.service_fee : '-'}</div></div>
+        <div class="info-card"><div class="info-card-label">Amount Paid</div><div class="info-card-value">${cd.amount_paid ? '$' + cd.amount_paid : '-'}</div></div>
+        <div class="info-card"><div class="info-card-label">Payment Status</div><div class="info-card-value"><span class="portal-badge ${cd.payment_status === 'paid' ? 'green' : 'yellow'}">${cd.payment_status || 'Pending'}</span></div></div>
+    `;
+}
+
+function renderCustomerFiles() {
+    const files = currentUser.files || [];
+    const area = document.getElementById('custFilesArea');
+    
+    if (files.length === 0) {
+        area.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-light);"><p>No documents available yet. Your tax preparer will upload your documents here.</p></div>';
+        return;
+    }
+    
+    area.innerHTML = files.map(f => {
+        const fid = registerFile(f.file_data, f.file_name);
+        return `
+        <div class="file-row">
+            <span class="file-row-icon">${getFileIcon(f.file_name)}</span>
+            <div class="file-row-info">
+                <div class="file-row-name">${f.file_name}</div>
+                <div class="file-row-meta">${new Date(f.uploaded_at).toLocaleDateString()}</div>
+            </div>
+            <div class="file-row-actions">
+                <button class="portal-btn portal-btn-outline" style="padding:8px 14px;font-size:0.8rem;" onclick="viewFileById('${fid}')">👁️ View</button>
+                <button class="portal-btn portal-btn-success" style="padding:8px 14px;font-size:0.8rem;" onclick="downloadFileById('${fid}')">⬇️ Download</button>
+            </div>
+        </div>
+    `}).join('');
+}
+
+function renderCustomerUploadedFiles() {
+    const uploads = currentUser.uploads || [];
+    const area = document.getElementById('custUploadedArea');
+    
+    if (uploads.length === 0) {
+        area.innerHTML = '<p style="color:var(--text-light);text-align:center;">No files uploaded yet.</p>';
+        return;
+    }
+    
+    area.innerHTML = uploads.map(u => {
+        const fid = registerFile(u.file_data, u.file_name);
+        return `
+        <div class="file-row">
+            <span class="file-row-icon">${getFileIcon(u.file_name)}</span>
+            <div class="file-row-info">
+                <div class="file-row-name">${u.file_name}</div>
+                <div class="file-row-meta">${new Date(u.uploaded_at).toLocaleDateString()}</div>
+            </div>
+            <div class="file-row-actions">
+                <button class="portal-btn portal-btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="viewFileById('${fid}')">👁️</button>
+            </div>
+        </div>
+    `}).join('');
+}
+
+async function handleCustomerUpload(e) {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    showLoading('Uploading...');
+    
+    try {
+        for (const file of files) {
+            const reader = new FileReader();
+            await new Promise((resolve) => {
+                reader.onload = async (ev) => {
+                    await db.from('customer_uploads').insert({
+                        customer_id: currentUser.id,
+                        file_name: file.name,
+                        file_type: file.type,
+                        file_size: file.size,
+                        file_data: ev.target.result
+                    });
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        await loadCustomerData();
+        renderCustomerUploadedFiles();
+        document.getElementById('custFileInput').value = '';
+        hideLoading();
+        alert('Document(s) uploaded successfully!');
+    } catch (err) {
+        hideLoading();
+        alert('Error uploading: ' + err.message);
+    }
+}
+</script>
+</body>
+</html>
