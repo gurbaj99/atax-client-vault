@@ -1000,6 +1000,16 @@
                         <input type="file" id="restoreInput" accept=".json" onchange="restoreBackup(event)" style="display:none;">
                     </div>
                 </div>
+                <div class="portal-card">
+                    <div class="portal-card-header">
+                        <span class="portal-card-title">👤 Customer Account Management</span>
+                        <button class="portal-btn portal-btn-primary" onclick="refreshAccountList()">🔄 Refresh</button>
+                    </div>
+                    <div class="portal-card-body">
+                        <p style="color:var(--text-light);margin-bottom:15px;font-size:0.85rem;">Link existing customer accounts to client records. Customers must be linked to see their tax info and download files.</p>
+                        <div id="accountMgmtArea" style="min-height:60px;"><p style="color:var(--text-light);text-align:center;">Loading...</p></div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -1636,6 +1646,7 @@ function setupNavigation() {
             if (view === 'adminUploads') renderCustomerUploads();
             if (view === 'adminFiles') renderFilesView();
             if (view === 'adminLinks') renderLinks();
+            if (view === 'adminSettings') renderAccountManagement();
             if (view === 'custFiles') renderCustomerFiles();
             if (view === 'custUpload') renderCustomerUploadedFiles();
         });
@@ -1682,7 +1693,7 @@ function mobileNavTo(view, portalType) {
     if (view === 'adminUploads') renderCustomerUploads();
     if (view === 'adminFiles') renderFilesView();
     if (view === 'adminLinks') renderLinks();
-    if (view === 'adminSettings') {}
+    if (view === 'adminSettings') renderAccountManagement();
     if (view === 'custDashboard') renderCustomerDashboard();
     if (view === 'custFiles') renderCustomerFiles();
     if (view === 'custUpload') renderCustomerUploadedFiles();
@@ -2474,6 +2485,93 @@ function copyRegLink() {
     const link = document.getElementById('regLinkDisplay').textContent;
     navigator.clipboard.writeText(link);
     alert('Link copied!');
+}
+
+// ============ CUSTOMER ACCOUNT MANAGEMENT ============
+function refreshAccountList() {
+    renderAccountManagement();
+}
+
+async function renderAccountManagement() {
+    await loadAllData();
+    const area = document.getElementById('accountMgmtArea');
+    if (!area) return;
+    
+    if (customerAccounts.length === 0) {
+        area.innerHTML = '<p style="color:var(--text-light);text-align:center;">No customer accounts yet.</p>';
+        return;
+    }
+    
+    area.innerHTML = customerAccounts.map(a => {
+        const linkedClient = a.client_id ? clients.find(c => c.id === a.client_id) : null;
+        const linkedName = linkedClient ? linkedClient.first_name + ' ' + linkedClient.last_name : null;
+        const statusColor = a.status === 'approved' ? 'green' : a.status === 'pending' ? 'yellow' : 'red';
+        
+        return `
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;">
+                <div style="font-weight:600;font-size:0.9rem;">${a.first_name} ${a.last_name}</div>
+                <div style="font-size:0.8rem;color:var(--text-light);">${a.email}</div>
+            </div>
+            <span class="portal-badge ${statusColor}" style="font-size:0.7rem;">${a.status}</span>
+            ${linkedName 
+                ? '<span style="font-size:0.8rem;color:#68d391;">✓ Linked to: ' + linkedName + '</span>' 
+                : '<span style="font-size:0.8rem;color:#fc8181;">✕ Not linked</span>'
+            }
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                ${!linkedName ? '<select class="portal-form-input portal-form-select" id="linkSelect_' + a.id + '" style="padding:6px 10px;font-size:0.75rem;width:160px;"><option value="">-- Link to client --</option>' + clients.map(c => '<option value="' + c.id + '">' + c.first_name + ' ' + c.last_name + '</option>').join('') + '</select><button class="portal-btn portal-btn-success" style="padding:6px 12px;font-size:0.75rem;" onclick="linkAccountToClient(\'' + a.id + '\')">Link</button>' : '<button class="portal-btn portal-btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="unlinkAccount(\'' + a.id + '\')">Unlink</button>'}
+                <button class="portal-btn" style="padding:6px 12px;font-size:0.75rem;background:var(--danger);" onclick="deleteAccount('${a.id}')">Delete</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function linkAccountToClient(accountId) {
+    const select = document.getElementById('linkSelect_' + accountId);
+    if (!select || !select.value) {
+        alert('Please select a client to link to');
+        return;
+    }
+    
+    showLoading('Linking...');
+    try {
+        await db.from('customer_accounts').update({ client_id: select.value }).eq('id', accountId);
+        await loadAllData();
+        renderAccountManagement();
+        hideLoading();
+        alert('Account linked successfully! The customer can now see their tax info and files.');
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+async function unlinkAccount(accountId) {
+    if (!confirm('Unlink this account from client? Customer will lose access to their files.')) return;
+    showLoading('Unlinking...');
+    try {
+        await db.from('customer_accounts').update({ client_id: null }).eq('id', accountId);
+        await loadAllData();
+        renderAccountManagement();
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
+}
+
+async function deleteAccount(accountId) {
+    if (!confirm('Delete this customer account? They will no longer be able to log in.')) return;
+    showLoading('Deleting...');
+    try {
+        await db.from('customer_accounts').delete().eq('id', accountId);
+        await loadAllData();
+        renderAccountManagement();
+        hideLoading();
+    } catch (err) {
+        hideLoading();
+        alert('Error: ' + err.message);
+    }
 }
 
 async function downloadBackup() {
