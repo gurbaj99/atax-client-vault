@@ -777,33 +777,82 @@
                     
                     <!-- Customer Register -->
                     <div id="customerRegister" class="hidden">
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                            <div class="form-group">
-                                <label>First Name *</label>
-                                <input type="text" class="form-input" id="regFirstName">
+                        <!-- Step 1: Service Selection -->
+                        <div id="regStep1">
+                            <p style="font-weight:600;margin-bottom:12px;font-size:0.95rem;text-align:center;">What service do you need?</p>
+                            <div style="display:flex;gap:10px;margin-bottom:15px;">
+                                <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.85rem;" id="svcTaxLabel">
+                                    <input type="checkbox" id="svcTax" onchange="updateRegSvc()" checked> 📊 Tax Preparation
+                                </label>
+                                <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.85rem;" id="svcInsLabel">
+                                    <input type="checkbox" id="svcIns" onchange="updateRegSvc()"> 🏥 Health Insurance
+                                </label>
                             </div>
-                            <div class="form-group">
-                                <label>Last Name *</label>
-                                <input type="text" class="form-input" id="regLastName">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                <div class="form-group"><label>First Name *</label><input type="text" class="form-input" id="regFirstName"></div>
+                                <div class="form-group"><label>Last Name *</label><input type="text" class="form-input" id="regLastName"></div>
+                            </div>
+                            <div class="form-group"><label>Email *</label><input type="email" class="form-input" id="regEmail"></div>
+                            <div class="form-group"><label>Phone *</label><input type="tel" class="form-input" id="regPhone"></div>
+                            <div class="form-group"><label>Address *</label><input type="text" class="form-input" id="regAddress"></div>
+                            <div class="form-group"><label>Social Security Number (Last 4) *</label><input type="text" class="form-input" id="regSSN" maxlength="4" placeholder="Last 4 digits only"></div>
+                            <div class="form-group"><label>Password *</label><input type="password" class="form-input" id="regPassword" placeholder="Min 6 characters"></div>
+                            <button class="form-btn" onclick="goRegStep2()" style="margin-top:5px;">Next → Document Checklist</button>
+                        </div>
+                        
+                        <!-- Step 2: Document Checklist -->
+                        <div id="regStep2" class="hidden">
+                            <p style="font-weight:600;margin-bottom:8px;font-size:0.95rem;">📋 Document Checklist</p>
+                            <p style="font-size:0.8rem;color:var(--text-light);margin-bottom:12px;">For each document, select if you have it, will upload later, or it's not applicable.</p>
+                            
+                            <!-- Tax Documents (shown when Tax is selected) -->
+                            <div id="taxDocsSection">
+                                <p style="font-weight:600;font-size:0.85rem;color:var(--accent);margin-bottom:8px;">📊 Tax Preparation Documents</p>
+                                <div class="form-group"><label style="font-size:0.85rem;">Government ID (Driver License / State ID) *</label>
+                                    <select class="form-input" id="docID"><option value="">-- Select --</option><option value="have">I have it ready</option><option value="upload_later">I'll upload later</option></select></div>
+                                <div class="form-group"><label style="font-size:0.85rem;">W-2 (Wage Statement)</label>
+                                    <select class="form-input" id="docW2"><option value="">-- Select --</option><option value="have">I have it ready</option><option value="upload_later">I'll upload later</option><option value="na">Not applicable / I don't have W-2</option></select></div>
+                                <div class="form-group"><label style="font-size:0.85rem;">1099-NEC (Self-Employment Income)</label>
+                                    <select class="form-input" id="doc1099NEC"><option value="">-- Select --</option><option value="have">I have it ready</option><option value="upload_later">I'll upload later</option><option value="na">Not applicable</option></select></div>
+                                <div class="form-group"><label style="font-size:0.85rem;">1099-K (Payment Card / Third Party Income)</label>
+                                    <select class="form-input" id="doc1099K"><option value="">-- Select --</option><option value="have">I have it ready</option><option value="upload_later">I'll upload later</option><option value="na">Not applicable</option></select></div>
+                                <div class="form-group"><label style="font-size:0.85rem;">1095-A (Health Insurance Marketplace Statement)</label>
+                                    <select class="form-input" id="doc1095A"><option value="">-- Select --</option><option value="have">I have it ready</option><option value="no_insurance">I didn't have insurance last year</option><option value="no_doc">I had insurance but don't have this document</option><option value="upload_later">I'll upload later</option></select></div>
+                                <div class="form-group"><label style="font-size:0.85rem;">Last Year Tax Return</label>
+                                    <select class="form-input" id="docLastReturn"><option value="">-- Select --</option><option value="have">I have it ready</option><option value="upload_later">I'll upload later</option><option value="first_time">This is my first year filing - never filed before</option><option value="didnt_file">I didn't file last year</option></select></div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                    <div class="form-group"><label style="font-size:0.85rem;">Bank Account Number *</label><input type="text" class="form-input" id="regBankAcct" placeholder="For direct deposit"></div>
+                                    <div class="form-group"><label style="font-size:0.85rem;">Routing Number *</label><input type="text" class="form-input" id="regRouting" placeholder="9 digits"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Insurance Documents (shown when Insurance is selected) -->
+                            <div id="insDocsSection" class="hidden">
+                                <p style="font-weight:600;font-size:0.85rem;color:var(--success);margin:15px 0 8px;">🏥 Health Insurance Documents</p>
+                                <div class="form-group"><label style="font-size:0.85rem;">Government ID *</label>
+                                    <select class="form-input" id="docInsID"><option value="">-- Select --</option><option value="have">I have it ready</option><option value="upload_later">I'll upload later</option></select></div>
+                                <div class="form-group"><label style="font-size:0.85rem;">Social Security Card *</label>
+                                    <select class="form-input" id="docInsSSN"><option value="">-- Select --</option><option value="have">I have it ready</option><option value="upload_later">I'll upload later</option></select></div>
+                            </div>
+                            
+                            <!-- IRS Guidance Box -->
+                            <div style="background:#1e3a5f;color:white;padding:14px;border-radius:8px;margin:12px 0;font-size:0.8rem;line-height:1.5;">
+                                <p style="font-weight:700;margin-bottom:6px;">📌 Don't have your documents? Get them from IRS.gov:</p>
+                                <ol style="margin:0;padding-left:18px;">
+                                    <li>Go to <strong>IRS.gov</strong> → Click <strong>"Create New Account"</strong> with <strong>ID.me</strong></li>
+                                    <li>Select <strong>"Individual"</strong> account (NOT Business)</li>
+                                    <li>Choose <strong>"Text Message"</strong> for authentication</li>
+                                    <li>Choose <strong>"Self Service"</strong> for verification (NOT video call)</li>
+                                    <li>For <strong>W-2, 1099, 1095-A</strong>: Go to <strong>Account Home → Tax Records → View/Download</strong></li>
+                                    <li>For <strong>Last Year Tax Return</strong>: Go to <strong>Account Home → Tax Records → Download Tax Transcript</strong></li>
+                                </ol>
+                            </div>
+                            
+                            <div style="display:flex;gap:10px;margin-top:10px;">
+                                <button class="form-btn" onclick="goRegStep1()" style="background:var(--text-medium);flex:1;">← Back</button>
+                                <button class="form-btn" onclick="customerRegister()" style="flex:2;">Create Account</button>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Email *</label>
-                            <input type="email" class="form-input" id="regEmail">
-                        </div>
-                        <div class="form-group">
-                            <label>Phone</label>
-                            <input type="tel" class="form-input" id="regPhone">
-                        </div>
-                        <div class="form-group">
-                            <label>Address</label>
-                            <input type="text" class="form-input" id="regAddress">
-                        </div>
-                        <div class="form-group">
-                            <label>Password *</label>
-                            <input type="password" class="form-input" id="regPassword" placeholder="Min 6 characters">
-                        </div>
-                        <button class="form-btn" onclick="customerRegister()">Create Account</button>
                     </div>
                 </div>
                 
@@ -842,6 +891,7 @@
             <div class="portal-mobile-nav-item active" onclick="mobileNavTo('adminDashboard','admin')"><span class="portal-nav-icon">📊</span> Dashboard</div>
             <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminPending','admin')"><span class="portal-nav-icon">⏳</span> Pending Approvals</div>
             <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminUploads','admin')"><span class="portal-nav-icon">📤</span> Customer Uploads</div>
+            <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminAccounts','admin')"><span class="portal-nav-icon">👤</span> Account Management</div>
             <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminFiles','admin')"><span class="portal-nav-icon">📁</span> Client Files</div>
             <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminLinks','admin')"><span class="portal-nav-icon">🔗</span> Quick Links</div>
             <div class="portal-mobile-nav-item" onclick="mobileNavTo('adminSettings','admin')"><span class="portal-nav-icon">⚙️</span> Settings</div>
@@ -867,6 +917,7 @@
                 <div class="portal-nav-item" data-view="adminUploads"><span class="portal-nav-icon">📤</span> Customer Uploads <span class="portal-nav-badge" id="uploadsBadge" style="background:var(--accent);">0</span></div>
                 
                 <div class="portal-nav-title">Management</div>
+                <div class="portal-nav-item" data-view="adminAccounts"><span class="portal-nav-icon">👤</span> Account Management</div>
                 <div class="portal-nav-item" data-view="adminFiles"><span class="portal-nav-icon">📁</span> Client Files</div>
                 <div class="portal-nav-item" data-view="adminLinks"><span class="portal-nav-icon">🔗</span> Quick Links</div>
                 
@@ -937,6 +988,45 @@
                 </div>
                 <p style="color:var(--text-light);margin-bottom:20px;">Documents uploaded by customers</p>
                 <div id="customerUploadsArea"></div>
+            </div>
+            
+            <!-- Account Management View -->
+            <div class="portal-view" id="adminAccountsView">
+                <div class="portal-header">
+                    <h1 class="portal-title">Account Management</h1>
+                    <div class="portal-actions">
+                        <div class="search-box" style="width:250px;">
+                            <input type="text" placeholder="Search accounts..." id="accountSearch" oninput="renderAccountMgmt()">
+                        </div>
+                        <button class="portal-btn portal-btn-primary" onclick="openCreateAccountModal()">➕ Create Account</button>
+                    </div>
+                </div>
+                <div class="portal-stats" id="accountStats"></div>
+                <div class="portal-card">
+                    <div class="portal-card-header">
+                        <span class="portal-card-title">Customer Login Accounts</span>
+                        <div style="display:flex;gap:5px;">
+                            <button class="portal-btn portal-btn-outline" onclick="setAccountFilter('all')">All</button>
+                            <button class="portal-btn portal-btn-outline" onclick="setAccountFilter('linked')">Linked</button>
+                            <button class="portal-btn portal-btn-outline" onclick="setAccountFilter('unlinked')">Unlinked</button>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="portal-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Username</th>
+                                    <th>Password</th>
+                                    <th>Status</th>
+                                    <th>Linked Client</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accountsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
             
             <!-- Files View -->
@@ -1457,50 +1547,78 @@ async function customerRegister() {
     const email = document.getElementById('regEmail').value.trim();
     const phone = document.getElementById('regPhone').value.trim();
     const address = document.getElementById('regAddress').value.trim();
+    const ssn = document.getElementById('regSSN')?.value?.trim() || '';
     const password = document.getElementById('regPassword').value;
+    
+    const tax = document.getElementById('svcTax').checked;
+    const ins = document.getElementById('svcIns').checked;
+    const serviceType = (tax && ins) ? 'both' : ins ? 'insurance' : 'tax';
     
     if (!firstName || !lastName || !email || !password) {
         showAuthAlert('Please fill in all required fields');
         return;
     }
-    
     if (password.length < 6) {
         showAuthAlert('Password must be at least 6 characters');
         return;
     }
     
+    // Collect document checklist
+    const docs = {};
+    if (tax) {
+        docs.id = document.getElementById('docID')?.value || '';
+        docs.w2 = document.getElementById('docW2')?.value || '';
+        docs.nec_1099 = document.getElementById('doc1099NEC')?.value || '';
+        docs.k_1099 = document.getElementById('doc1099K')?.value || '';
+        docs.a_1095 = document.getElementById('doc1095A')?.value || '';
+        docs.last_return = document.getElementById('docLastReturn')?.value || '';
+        docs.bank_account = document.getElementById('regBankAcct')?.value?.trim() || '';
+        docs.routing = document.getElementById('regRouting')?.value?.trim() || '';
+    }
+    if (ins) {
+        docs.ins_id = document.getElementById('docInsID')?.value || '';
+        docs.ins_ssn = document.getElementById('docInsSSN')?.value || '';
+    }
+    
+    // Generate username: firstname.lastname
+    const username = firstName.toLowerCase().replace(/\s+/g, '') + '.' + lastName.toLowerCase().replace(/\s+/g, '');
+    
     showLoading('Creating account...');
     
     try {
-        // Check if email exists
         const { data: existing } = await db
             .from('customer_accounts')
             .select('id')
-            .eq('email', email)
+            .eq('email', username)
             .single();
         
         if (existing) {
             hideLoading();
-            showAuthAlert('An account with this email already exists');
+            showAuthAlert('An account for this name already exists. Please contact ATAX Manteca.');
             return;
         }
         
         await db.from('customer_accounts').insert({
-            email,
+            email: username,
             password,
             first_name: firstName,
             last_name: lastName,
             phone,
             address,
+            ssn_last4: ssn,
+            service_type: serviceType,
+            doc_checklist: JSON.stringify(docs),
             status: 'pending'
         });
         
         hideLoading();
-        showAuthAlert('Account created! Please wait for admin approval.', 'success');
+        showAuthAlert('Account created! Your username is: ' + username + '. Please wait for admin approval.', 'success');
         
-        // Clear form
-        ['regFirstName', 'regLastName', 'regEmail', 'regPhone', 'regAddress', 'regPassword'].forEach(id => {
-            document.getElementById(id).value = '';
+        // Reset form
+        goRegStep1();
+        ['regFirstName', 'regLastName', 'regEmail', 'regPhone', 'regAddress', 'regSSN', 'regPassword', 'regBankAcct', 'regRouting'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
         });
         
     } catch (err) {
@@ -1644,6 +1762,7 @@ function setupNavigation() {
             if (view === 'adminDashboard') renderDashboard();
             if (view === 'adminPending') renderPendingApprovals();
             if (view === 'adminUploads') renderCustomerUploads();
+            if (view === 'adminAccounts') renderAccountMgmt();
             if (view === 'adminFiles') renderFilesView();
             if (view === 'adminLinks') renderLinks();
             if (view === 'adminSettings') renderAccountManagement();
@@ -1691,6 +1810,7 @@ function mobileNavTo(view, portalType) {
     if (view === 'adminDashboard') renderDashboard();
     if (view === 'adminPending') renderPendingApprovals();
     if (view === 'adminUploads') renderCustomerUploads();
+    if (view === 'adminAccounts') renderAccountMgmt();
     if (view === 'adminFiles') renderFilesView();
     if (view === 'adminLinks') renderLinks();
     if (view === 'adminSettings') renderAccountManagement();
@@ -2487,91 +2607,183 @@ function copyRegLink() {
     alert('Link copied!');
 }
 
-// ============ CUSTOMER ACCOUNT MANAGEMENT ============
-function refreshAccountList() {
-    renderAccountManagement();
-}
+// ============ CUSTOMER ACCOUNT MANAGEMENT TAB ============
+let accountFilter = 'all';
 
-async function renderAccountManagement() {
+function setAccountFilter(f) { accountFilter = f; renderAccountMgmt(); }
+
+async function renderAccountMgmt() {
     await loadAllData();
-    const area = document.getElementById('accountMgmtArea');
-    if (!area) return;
+    const statsArea = document.getElementById('accountStats');
+    if (statsArea) {
+        const total = customerAccounts.length;
+        const linked = customerAccounts.filter(a => a.client_id).length;
+        const pending = customerAccounts.filter(a => a.status === 'pending').length;
+        statsArea.innerHTML = `
+            <div class="portal-stat"><div class="portal-stat-icon blue">👥</div><div class="portal-stat-value">${total}</div><div class="portal-stat-label">Total Accounts</div></div>
+            <div class="portal-stat"><div class="portal-stat-icon green">✓</div><div class="portal-stat-value">${linked}</div><div class="portal-stat-label">Linked</div></div>
+            <div class="portal-stat"><div class="portal-stat-icon red">✕</div><div class="portal-stat-value">${total - linked}</div><div class="portal-stat-label">Unlinked</div></div>
+            <div class="portal-stat"><div class="portal-stat-icon gold">⏳</div><div class="portal-stat-value">${pending}</div><div class="portal-stat-label">Pending</div></div>
+        `;
+    }
     
-    if (customerAccounts.length === 0) {
-        area.innerHTML = '<p style="color:var(--text-light);text-align:center;">No customer accounts yet.</p>';
+    // Also update settings area if exists
+    const settingsArea = document.getElementById('accountMgmtArea');
+    if (settingsArea) settingsArea.innerHTML = '<p style="color:var(--text-light);text-align:center;">Use the Account Management tab in the sidebar for full management.</p>';
+    
+    const search = (document.getElementById('accountSearch')?.value || '').toLowerCase();
+    let filtered = customerAccounts.filter(a => {
+        const name = (a.first_name + ' ' + a.last_name + ' ' + a.email).toLowerCase();
+        const matchesSearch = name.includes(search);
+        const isLinked = !!a.client_id;
+        const matchesFilter = accountFilter === 'all' || (accountFilter === 'linked' && isLinked) || (accountFilter === 'unlinked' && !isLinked);
+        return matchesSearch && matchesFilter;
+    });
+    
+    const tbody = document.getElementById('accountsTableBody');
+    if (!tbody) return;
+    
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-light);padding:30px;">No accounts found</td></tr>';
         return;
     }
     
-    area.innerHTML = customerAccounts.map(a => {
+    tbody.innerHTML = filtered.map(a => {
         const linkedClient = a.client_id ? clients.find(c => c.id === a.client_id) : null;
         const linkedName = linkedClient ? linkedClient.first_name + ' ' + linkedClient.last_name : null;
-        const statusColor = a.status === 'approved' ? 'green' : a.status === 'pending' ? 'yellow' : 'red';
+        const statusClass = a.status === 'approved' ? 'green' : a.status === 'pending' ? 'yellow' : 'red';
+        const fileCount = linkedClient ? clientFiles.filter(f => f.client_id === linkedClient.id).length : 0;
+        const svcType = a.service_type || 'tax';
+        const svcBadge = svcType === 'both' ? '📊🏥' : svcType === 'insurance' ? '🏥' : '📊';
         
-        return `
-        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:8px;flex-wrap:wrap;">
-            <div style="flex:1;min-width:200px;">
-                <div style="font-weight:600;font-size:0.9rem;">${a.first_name} ${a.last_name}</div>
-                <div style="font-size:0.8rem;color:var(--text-light);">${a.email}</div>
-            </div>
-            <span class="portal-badge ${statusColor}" style="font-size:0.7rem;">${a.status}</span>
-            ${linkedName 
-                ? '<span style="font-size:0.8rem;color:#68d391;">✓ Linked to: ' + linkedName + '</span>' 
-                : '<span style="font-size:0.8rem;color:#fc8181;">✕ Not linked</span>'
-            }
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                ${!linkedName ? '<select class="portal-form-input portal-form-select" id="linkSelect_' + a.id + '" style="padding:6px 10px;font-size:0.75rem;width:160px;"><option value="">-- Link to client --</option>' + clients.map(c => '<option value="' + c.id + '">' + c.first_name + ' ' + c.last_name + '</option>').join('') + '</select><button class="portal-btn portal-btn-success" style="padding:6px 12px;font-size:0.75rem;" onclick="linkAccountToClient(\'' + a.id + '\')">Link</button>' : '<button class="portal-btn portal-btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="unlinkAccount(\'' + a.id + '\')">Unlink</button>'}
-                <button class="portal-btn" style="padding:6px 12px;font-size:0.75rem;background:var(--danger);" onclick="deleteAccount('${a.id}')">Delete</button>
-            </div>
-        </div>`;
+        return `<tr>
+            <td><div class="client-row"><div class="client-avatar" style="background:linear-gradient(135deg, #38a169, #2f855a);">${((a.first_name||'')[0]||'?').toUpperCase()}</div><div class="client-info"><h4>${a.first_name} ${a.last_name}</h4><span>${svcBadge} ${fileCount} files</span></div></div></td>
+            <td style="font-family:monospace;font-size:0.85rem;">${a.email}</td>
+            <td><div style="display:flex;align-items:center;gap:4px;"><span style="font-family:monospace;font-size:0.85rem;" id="pw_${a.id}">••••••••</span><button class="action-btn" onclick="document.getElementById('pw_${a.id}').textContent=document.getElementById('pw_${a.id}').textContent==='••••••••'?'${(a.password||'').replace(/'/g,"\\'")}'+'':'••••••••'" title="Show/Hide">👁️</button></div></td>
+            <td><span class="portal-badge ${statusClass}">${a.status}</span></td>
+            <td>${linkedName ? '<span style="color:#68d391;">✓ ' + linkedName + '</span>' : '<span style="color:#fc8181;">✕ Not linked</span>'}</td>
+            <td><div class="action-btns">
+                <button class="action-btn" onclick="editAcct('${a.id}')" title="Edit">✏️</button>
+                ${!linkedName ? '<button class="action-btn docs" onclick="linkAcct(\'' + a.id + '\')" title="Link">🔗</button>' : '<button class="action-btn" onclick="unlinkAccount(\'' + a.id + '\')" title="Unlink">🔓</button>'}
+                ${a.status==='pending' ? '<button class="action-btn docs" onclick="approveAcct(\'' + a.id + '\')" title="Approve">✅</button>' : ''}
+                <button class="action-btn delete" onclick="deleteAccount('${a.id}')" title="Delete">🗑️</button>
+            </div></td>
+        </tr>`;
     }).join('');
+}
+
+function editAcct(id) {
+    const a = customerAccounts.find(x => x.id === id);
+    if (!a) return;
+    const newUser = prompt('Username for ' + a.first_name + ' ' + a.last_name + ':', a.email);
+    if (!newUser) return;
+    const newPass = prompt('Password (leave empty to keep current):', '');
+    showLoading('Updating...');
+    (async () => {
+        try {
+            const upd = { email: newUser.trim() };
+            if (newPass) upd.password = newPass.trim();
+            await db.from('customer_accounts').update(upd).eq('id', id);
+            await loadAllData(); renderAccountMgmt(); hideLoading();
+            alert('Updated!');
+        } catch(e) { hideLoading(); alert('Error: ' + e.message); }
+    })();
+}
+
+function linkAcct(id) {
+    const a = customerAccounts.find(x => x.id === id);
+    if (!a) return;
+    const opts = clients.map((c,i) => (i+1) + '. ' + c.first_name + ' ' + c.last_name).join('\n');
+    const choice = prompt('Link ' + a.first_name + ' to which client? Enter number:\n\n' + opts);
+    if (!choice) return;
+    const idx = parseInt(choice) - 1;
+    if (isNaN(idx) || !clients[idx]) { alert('Invalid selection'); return; }
+    showLoading('Linking...');
+    (async () => {
+        try {
+            await db.from('customer_accounts').update({ client_id: clients[idx].id }).eq('id', id);
+            await loadAllData(); renderAccountMgmt(); hideLoading();
+            alert('Linked to ' + clients[idx].first_name + ' ' + clients[idx].last_name);
+        } catch(e) { hideLoading(); alert('Error: ' + e.message); }
+    })();
+}
+
+async function approveAcct(id) {
+    showLoading('Approving...');
+    try {
+        await db.from('customer_accounts').update({ status: 'approved' }).eq('id', id);
+        await loadAllData(); renderAccountMgmt(); renderPendingApprovals(); updateBadges(); hideLoading();
+        alert('Approved!');
+    } catch(e) { hideLoading(); alert('Error: ' + e.message); }
+}
+
+function refreshAccountList() { renderAccountMgmt(); }
+
+async function renderAccountManagement() {
+    const area = document.getElementById('accountMgmtArea');
+    if (!area) return;
+    area.innerHTML = '<p style="color:var(--text-light);text-align:center;">Go to <strong>Account Management</strong> tab in sidebar for full management.</p>';
 }
 
 async function linkAccountToClient(accountId) {
     const select = document.getElementById('linkSelect_' + accountId);
-    if (!select || !select.value) {
-        alert('Please select a client to link to');
-        return;
-    }
-    
+    if (!select || !select.value) { alert('Select a client'); return; }
     showLoading('Linking...');
     try {
         await db.from('customer_accounts').update({ client_id: select.value }).eq('id', accountId);
-        await loadAllData();
-        renderAccountManagement();
-        hideLoading();
-        alert('Account linked successfully! The customer can now see their tax info and files.');
-    } catch (err) {
-        hideLoading();
-        alert('Error: ' + err.message);
-    }
+        await loadAllData(); renderAccountMgmt(); hideLoading(); alert('Linked!');
+    } catch(e) { hideLoading(); alert('Error: ' + e.message); }
 }
 
-async function unlinkAccount(accountId) {
-    if (!confirm('Unlink this account from client? Customer will lose access to their files.')) return;
+async function unlinkAccount(id) {
+    if (!confirm('Unlink this account?')) return;
     showLoading('Unlinking...');
     try {
-        await db.from('customer_accounts').update({ client_id: null }).eq('id', accountId);
-        await loadAllData();
-        renderAccountManagement();
-        hideLoading();
-    } catch (err) {
-        hideLoading();
-        alert('Error: ' + err.message);
-    }
+        await db.from('customer_accounts').update({ client_id: null }).eq('id', id);
+        await loadAllData(); renderAccountMgmt(); hideLoading();
+    } catch(e) { hideLoading(); alert('Error: ' + e.message); }
 }
 
-async function deleteAccount(accountId) {
-    if (!confirm('Delete this customer account? They will no longer be able to log in.')) return;
+async function deleteAccount(id) {
+    if (!confirm('Delete this customer account permanently?')) return;
     showLoading('Deleting...');
     try {
-        await db.from('customer_accounts').delete().eq('id', accountId);
-        await loadAllData();
-        renderAccountManagement();
-        hideLoading();
-    } catch (err) {
-        hideLoading();
-        alert('Error: ' + err.message);
-    }
+        await db.from('customer_accounts').delete().eq('id', id);
+        await loadAllData(); renderAccountMgmt(); hideLoading();
+    } catch(e) { hideLoading(); alert('Error: ' + e.message); }
+}
+
+// ============ REGISTRATION STEPS ============
+function updateRegSvc() {
+    const tax = document.getElementById('svcTax').checked;
+    const ins = document.getElementById('svcIns').checked;
+    document.getElementById('svcTaxLabel').style.borderColor = tax ? 'var(--accent)' : 'var(--border)';
+    document.getElementById('svcInsLabel').style.borderColor = ins ? 'var(--success)' : 'var(--border)';
+}
+
+function goRegStep1() {
+    document.getElementById('regStep1').classList.remove('hidden');
+    document.getElementById('regStep2').classList.add('hidden');
+}
+
+function goRegStep2() {
+    const fn = document.getElementById('regFirstName').value.trim();
+    const ln = document.getElementById('regLastName').value.trim();
+    const em = document.getElementById('regEmail').value.trim();
+    const ph = document.getElementById('regPhone').value.trim();
+    const pw = document.getElementById('regPassword').value;
+    
+    if (!fn || !ln || !em || !ph || !pw) { showAuthAlert('Please fill in all required fields'); return; }
+    if (pw.length < 6) { showAuthAlert('Password must be at least 6 characters'); return; }
+    
+    const tax = document.getElementById('svcTax').checked;
+    const ins = document.getElementById('svcIns').checked;
+    if (!tax && !ins) { showAuthAlert('Please select at least one service'); return; }
+    
+    document.getElementById('taxDocsSection').classList.toggle('hidden', !tax);
+    document.getElementById('insDocsSection').classList.toggle('hidden', !ins);
+    document.getElementById('regStep1').classList.add('hidden');
+    document.getElementById('regStep2').classList.remove('hidden');
 }
 
 async function downloadBackup() {
