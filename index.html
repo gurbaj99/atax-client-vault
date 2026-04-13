@@ -794,7 +794,13 @@
                             </div>
                             <div class="form-group"><label>Email *</label><input type="email" class="form-input" id="regEmail"></div>
                             <div class="form-group"><label>Phone *</label><input type="tel" class="form-input" id="regPhone"></div>
-                            <div class="form-group"><label>Address *</label><input type="text" class="form-input" id="regAddress"></div>
+                            <div class="form-group" style="position:relative;"><label>Street Address *</label><input type="text" class="form-input" id="regStreet" placeholder="Start typing address..." autocomplete="off" oninput="autoCapInput(this); searchAddress(this.value)"><div id="addressSuggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--border);border-radius:0 0 6px 6px;max-height:180px;overflow-y:auto;z-index:100;box-shadow:var(--shadow-lg);"></div></div>
+                            <div class="form-group"><label>Suite / Apt # (Optional)</label><input type="text" class="form-input" id="regSuite" placeholder="Suite, Apt, Unit #" oninput="autoCapInput(this)"></div>
+                            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;">
+                                <div class="form-group"><label>City *</label><input type="text" class="form-input" id="regCity" oninput="autoCapInput(this)"></div>
+                                <div class="form-group"><label>State *</label><select class="form-input" id="regState"><option value="">--</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option selected>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div>
+                                <div class="form-group"><label>Zip *</label><input type="text" class="form-input" id="regZip" maxlength="5" placeholder="95336"></div>
+                            </div>
                             <div class="form-group"><label>Social Security Number (Last 4) *</label><input type="text" class="form-input" id="regSSN" maxlength="4" placeholder="Last 4 digits only"></div>
                             <div class="form-group"><label>Password *</label><input type="password" class="form-input" id="regPassword" placeholder="Min 6 characters"></div>
                             <button class="form-btn" onclick="goRegStep2()" style="margin-top:5px;">Next → Document Checklist</button>
@@ -1546,7 +1552,12 @@ async function customerRegister() {
     const lastName = document.getElementById('regLastName').value.trim();
     const email = document.getElementById('regEmail').value.trim();
     const phone = document.getElementById('regPhone').value.trim();
-    const address = document.getElementById('regAddress').value.trim();
+    const street = document.getElementById('regStreet')?.value?.trim() || '';
+    const suite = document.getElementById('regSuite')?.value?.trim() || '';
+    const city = document.getElementById('regCity')?.value?.trim() || '';
+    const state = document.getElementById('regState')?.value || '';
+    const zip = document.getElementById('regZip')?.value?.trim() || '';
+    const address = street + (suite ? ', ' + suite : '') + ', ' + city + ', ' + state + ' ' + zip;
     const ssn = document.getElementById('regSSN')?.value?.trim() || '';
     const password = document.getElementById('regPassword').value;
     
@@ -1616,7 +1627,7 @@ async function customerRegister() {
         
         // Reset form
         goRegStep1();
-        ['regFirstName', 'regLastName', 'regEmail', 'regPhone', 'regAddress', 'regSSN', 'regPassword', 'regBankAcct', 'regRouting'].forEach(id => {
+        ['regFirstName', 'regLastName', 'regEmail', 'regPhone', 'regStreet', 'regSuite', 'regCity', 'regZip', 'regSSN', 'regPassword', 'regBankAcct', 'regRouting'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
@@ -1690,7 +1701,7 @@ function showAdminPortal() {
     document.getElementById('customerPortal').classList.remove('active');
     document.getElementById('adminDisplayName').textContent = currentUser.email.split('@')[0];
     document.getElementById('regLinkDisplay').textContent = window.location.origin + window.location.pathname + '?register=1';
-    history.pushState({ portal: 'admin' }, '', '');
+    pushView('admin');
     renderDashboard();
 }
 
@@ -1701,7 +1712,7 @@ function showCustomerPortal() {
     document.getElementById('custPortalAvatar').textContent = (currentUser.first_name || 'C')[0].toUpperCase();
     document.getElementById('custPortalName').textContent = currentUser.first_name + ' ' + currentUser.last_name;
     document.getElementById('custWelcomeMsg').textContent = `Welcome, ${currentUser.first_name}!`;
-    history.pushState({ portal: 'customer' }, '', '');
+    pushView('customer');
     renderCustomerDashboard();
 }
 
@@ -1822,16 +1833,109 @@ function mobileNavTo(view, portalType) {
 }
 
 // ============ BROWSER BACK BUTTON SUPPORT ============
+// ============ BACK BUTTON FIX (SPA History) ============
+let currentView = 'landing';
+
+function pushView(view) {
+    currentView = view;
+    history.pushState({ view: view }, '', '');
+}
+
 window.addEventListener('popstate', (e) => {
-    if (e.state && e.state.portal) {
-        // Stay in portal, don't log out
+    if (e.state && e.state.view) {
+        const view = e.state.view;
+        if (view === 'landing') {
+            document.getElementById('landingPage').style.display = 'block';
+            document.getElementById('adminPortal').classList.remove('active');
+            document.getElementById('customerPortal').classList.remove('active');
+            updateNavButtons();
+        } else if (view === 'admin' && currentUserType === 'admin') {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('adminPortal').classList.add('active');
+            document.getElementById('customerPortal').classList.remove('active');
+        } else if (view === 'customer' && currentUserType === 'customer') {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('customerPortal').classList.add('active');
+            document.getElementById('adminPortal').classList.remove('active');
+        }
     } else {
-        // If we're in a portal and user hits back, go to landing page but keep session
+        // Unknown state — stay on landing page, push it to prevent going off-site
         if (currentUserType) {
             document.getElementById('landingPage').style.display = 'block';
             document.getElementById('adminPortal').classList.remove('active');
             document.getElementById('customerPortal').classList.remove('active');
+            updateNavButtons();
+            history.pushState({ view: 'landing' }, '', '');
         }
+    }
+});
+
+// Push initial state on load
+history.replaceState({ view: 'landing' }, '', '');
+
+// ============ AUTO CAPITALIZE & ADDRESS SEARCH ============
+function autoCapInput(el) {
+    const v = el.value;
+    if (!v) return;
+    el.value = v.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+let addressTimeout = null;
+async function searchAddress(query) {
+    const box = document.getElementById('addressSuggestions');
+    if (!box) return;
+    if (query.length < 4) { box.style.display = 'none'; return; }
+    
+    clearTimeout(addressTimeout);
+    addressTimeout = setTimeout(async () => {
+        try {
+            const resp = await fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=us&limit=5&q=' + encodeURIComponent(query));
+            const results = await resp.json();
+            
+            if (results.length === 0) { box.style.display = 'none'; return; }
+            
+            box.style.display = 'block';
+            box.innerHTML = results.map(r => {
+                const parts = r.display_name.split(',').map(s => s.trim());
+                return '<div style="padding:10px 12px;cursor:pointer;font-size:0.85rem;color:#333;border-bottom:1px solid #eee;hover:background:#f7f7f7;" onmouseover="this.style.background=\'#f0f0f0\'" onmouseout="this.style.background=\'white\'" onclick="selectAddress(this.dataset.addr)" data-addr=\'' + JSON.stringify({display: r.display_name, parts: parts}).replace(/'/g, '&#39;') + '\'>' + r.display_name.substring(0, 60) + (r.display_name.length > 60 ? '...' : '') + '</div>';
+            }).join('');
+        } catch(e) {
+            box.style.display = 'none';
+        }
+    }, 400);
+}
+
+function selectAddress(dataStr) {
+    try {
+        const data = JSON.parse(dataStr);
+        const parts = data.parts;
+        // Try to parse address parts
+        if (parts.length >= 4) {
+            document.getElementById('regStreet').value = parts[0] || '';
+            document.getElementById('regCity').value = parts.length >= 5 ? parts[parts.length - 4] : parts[1] || '';
+            // Try to find state
+            const stateMap = {'California':'CA','Texas':'TX','New York':'NY','Florida':'FL','Illinois':'IL','Pennsylvania':'PA','Ohio':'OH','Georgia':'GA','Michigan':'MI','North Carolina':'NC','New Jersey':'NJ','Virginia':'VA','Washington':'WA','Arizona':'AZ','Massachusetts':'MA','Tennessee':'TN','Indiana':'IN','Missouri':'MO','Maryland':'MD','Wisconsin':'WI','Colorado':'CO','Minnesota':'MN','South Carolina':'SC','Alabama':'AL','Louisiana':'LA','Kentucky':'KY','Oregon':'OR','Oklahoma':'OK','Connecticut':'CT','Utah':'UT','Iowa':'IA','Nevada':'NV','Arkansas':'AR','Mississippi':'MS','Kansas':'KS','New Mexico':'NM','Nebraska':'NE','Idaho':'ID','West Virginia':'WV','Hawaii':'HI','New Hampshire':'NH','Maine':'ME','Montana':'MT','Rhode Island':'RI','Delaware':'DE','South Dakota':'SD','North Dakota':'ND','Alaska':'AK','Vermont':'VT','Wyoming':'WY'};
+            for (const p of parts) {
+                if (stateMap[p]) {
+                    document.getElementById('regState').value = stateMap[p];
+                    break;
+                }
+            }
+            // Try to find zip
+            for (const p of parts) {
+                const zipMatch = p.match(/\b(\d{5})\b/);
+                if (zipMatch) { document.getElementById('regZip').value = zipMatch[1]; break; }
+            }
+        }
+    } catch(e) {}
+    document.getElementById('addressSuggestions').style.display = 'none';
+}
+
+// Close suggestions when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#regStreet') && !e.target.closest('#addressSuggestions')) {
+        const box = document.getElementById('addressSuggestions');
+        if (box) box.style.display = 'none';
     }
 });
 
@@ -2166,14 +2270,32 @@ function viewFileById(fid) {
         if (f.data.startsWith('data:image')) {
             const win = window.open('', '_blank');
             if (win) {
-                win.document.write('<html><head><title>' + f.name + '</title><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a202c;}</style></head><body><img src="' + f.data + '" style="max-width:100%;max-height:100vh;"></body></html>');
+                win.document.write('<html><head><title>' + f.name + '</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a202c;}img{max-width:100%;max-height:100vh;object-fit:contain;}</style></head><body><img src="' + f.data + '"></body></html>');
                 win.document.close();
             }
         } else if (f.data.startsWith('data:application/pdf')) {
-            const win = window.open('', '_blank');
-            if (win) {
-                win.document.write('<html><head><title>' + f.name + '</title></head><body style="margin:0;"><iframe src="' + f.data + '" style="width:100%;height:100vh;border:none;"></iframe></body></html>');
-                win.document.close();
+            // Convert base64 to blob for full PDF rendering (all pages)
+            try {
+                const byteChars = atob(f.data.split(',')[1]);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+                const blob = new Blob([byteArr], { type: 'application/pdf' });
+                const blobUrl = URL.createObjectURL(blob);
+                const win = window.open(blobUrl, '_blank');
+                if (!win) {
+                    // Fallback for popup blockers
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.target = '_blank';
+                    a.click();
+                }
+            } catch(e) {
+                // Fallback to iframe method
+                const win = window.open('', '_blank');
+                if (win) {
+                    win.document.write('<html><head><title>' + f.name + '</title><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;"><iframe src="' + f.data + '" style="width:100%;height:100vh;border:none;"></iframe></body></html>');
+                    win.document.close();
+                }
             }
         } else {
             downloadFileById(fid);
@@ -2771,9 +2893,11 @@ function goRegStep2() {
     const ln = document.getElementById('regLastName').value.trim();
     const em = document.getElementById('regEmail').value.trim();
     const ph = document.getElementById('regPhone').value.trim();
+    const st = document.getElementById('regStreet').value.trim();
+    const ct = document.getElementById('regCity').value.trim();
     const pw = document.getElementById('regPassword').value;
     
-    if (!fn || !ln || !em || !ph || !pw) { showAuthAlert('Please fill in all required fields'); return; }
+    if (!fn || !ln || !em || !ph || !st || !ct || !pw) { showAuthAlert('Please fill in all required fields'); return; }
     if (pw.length < 6) { showAuthAlert('Password must be at least 6 characters'); return; }
     
     const tax = document.getElementById('svcTax').checked;
