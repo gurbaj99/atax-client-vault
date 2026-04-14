@@ -3190,8 +3190,8 @@ async function bkScan() {
             fr += 1000;
         }
         bkLog('bk_dupLog', 'Loaded ' + all.length + ' records.', '#90cdf4');
-        // Group by FULL NAME combined (case-insensitive) to catch ALL CAPS vs Title Case
-        // e.g. first_name='ADESHPAL SINGH' last_name='' matches first_name='Adeshpal' last_name='Singh'
+        // Group by FULL NAME only (case-insensitive, whitespace-normalized)
+        // Ignore address differences — addresses may differ in formatting (CAPS, abbreviations)
         const g = {};
         for (const c of all) {
             const fullName = ((c.first_name||'') + ' ' + (c.last_name||'')).toLowerCase().trim().replace(/\s+/g,' ');
@@ -3199,34 +3199,17 @@ async function bkScan() {
             g[fullName].push(c);
         }
         let dg = [];
-        for (const recs of Object.values(g)) {
+        for (const [name, recs] of Object.entries(g)) {
             if (recs.length < 2) continue;
-            // Sub-group by normalized address
-            const addrGroups = {};
-            for (const c of recs) {
-                const addrKey = (c.address||'').toLowerCase().trim().replace(/\s+/g,' ');
-                if (!addrGroups[addrKey]) addrGroups[addrKey] = [];
-                addrGroups[addrKey].push(c);
-            }
-            for (const arecs of Object.values(addrGroups)) {
-                if (arecs.length > 1) {
-                    // Keep the record with the most complete data (has last_name + address)
-                    arecs.sort((a,b) => ((b.last_name||'').length + (b.notes||'').length + (b.address||'').length) - ((a.last_name||'').length + (a.notes||'').length + (a.address||'').length));
-                    dg.push({ keep: arecs[0], dups: arecs.slice(1) });
-                    arecs.slice(1).forEach(r => bk_toDelete.push(r.id));
-                }
-            }
-            // Also catch: same full name, one has no address
-            const withAddr = recs.filter(c => (c.address||'').trim().length > 0);
-            const noAddr = recs.filter(c => !(c.address||'').trim());
-            if (withAddr.length > 0 && noAddr.length > 0) {
-                noAddr.forEach(r => {
-                    if (!bk_toDelete.includes(r.id)) {
-                        bk_toDelete.push(r.id);
-                        dg.push({ keep: withAddr[0], dups: [r] });
-                    }
-                });
-            }
+            // Keep the record with the most complete data: has last_name, has address, has notes
+            recs.sort((a,b) => (
+                ((b.last_name||'').length + (b.address||'').length + (b.notes||'').length) -
+                ((a.last_name||'').length + (a.address||'').length + (a.notes||'').length)
+            ));
+            const keep = recs[0];
+            const dups = recs.slice(1);
+            dg.push({ keep, dups });
+            dups.forEach(r => bk_toDelete.push(r.id));
         }
         const tot = all.length, uniq = tot - bk_toDelete.length, dups = bk_toDelete.length;
         const ds = document.getElementById('bk_dupStats');
