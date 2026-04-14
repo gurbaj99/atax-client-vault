@@ -3071,27 +3071,27 @@ async function bkScan(){
   bkLog('bk_dupLog','Loading clients...','#90cdf4');bkStat('bk_dupStatus','⏳ Scanning...','info');
   try{
     let all=[],fr=0;
-    while(true){const{data,error}=await db.from('clients').select('id,first_name,last_name,address,created_at').order('created_at',{ascending:true}).range(fr,fr+999);if(error)throw error;if(\!data||\!data.length)break;all=all.concat(data);if(data.length<1000)break;fr+=1000;}
+    while(true){const{data,error}=await db.from('clients').select('id,first_name,last_name,address,created_at').order('created_at',{ascending:true}).range(fr,fr+999);if(error)throw error;if(!data||!data.length)break;all=all.concat(data);if(data.length<1000)break;fr+=1000;}
     bkLog('bk_dupLog','Loaded '+all.length+' records.','#90cdf4');
-    const g={};for(const c of all){const k=((c.first_name||'')+'||'+(c.last_name||'')+'||'+(c.address||'')).toLowerCase().trim();if(\!g[k])g[k]=[];g[k].push(c);}
+    const g={};for(const c of all){const k=((c.first_name||'')+'||'+(c.last_name||'')+'||'+(c.address||'')).toLowerCase().trim();if(!g[k])g[k]=[];g[k].push(c);}
     let dg=[];for(const recs of Object.values(g)){if(recs.length>1){dg.push({keep:recs[0],dups:recs.slice(1)});recs.slice(1).forEach(r=>bk_toDelete.push(r.id));}}
     const tot=all.length,uniq=Object.keys(g).length,dups=bk_toDelete.length;
     const ds=document.getElementById('bk_dupStats');ds.style.display='flex';
     document.getElementById('bk_sTotal').textContent=tot;document.getElementById('bk_sUnique').textContent=uniq;document.getElementById('bk_sDups').textContent=dups;
-    if(dups===0){bkLog('bk_dupLog','No duplicates — clean\!','#68d391');bkStat('bk_dupStatus','No duplicates found — portal is clean\!','ok');}
+    if(dups===0){bkLog('bk_dupLog','No duplicates — clean!','#68d391');bkStat('bk_dupStatus','No duplicates found — portal is clean!','ok');}
     else{dg.forEach(g2=>bkLog('bk_dupLog','DUP: '+g2.keep.first_name+' '+g2.keep.last_name+' ('+g2.dups.length+' extra)','#f6e05e'));bkStat('bk_dupStatus','⚠️ '+dups+' duplicates found. Click Delete to remove them.','warn');const db2=document.getElementById('bk_delBtn');db2.style.display='inline-block';db2.disabled=false;}
   }catch(e){bkLog('bk_dupLog','ERROR: '+e.message,'#fc8181');bkStat('bk_dupStatus','Error: '+e.message,'err');}
   btn.disabled=false;btn.textContent='🔍 Scan for Duplicates';
 }
 async function bkDelete(){
-  if(\!bk_toDelete.length){alert('Run scan first.');return;}
-  if(\!confirm('Delete '+bk_toDelete.length+' duplicates? Originals kept.'))return;
+  if(!bk_toDelete.length){alert('Run scan first.');return;}
+  if(!confirm('Delete '+bk_toDelete.length+' duplicates? Originals kept.'))return;
   const btn=document.getElementById('bk_delBtn');btn.disabled=true;btn.textContent='⏳ Deleting...';
   document.getElementById('bk_scanBtn').disabled=true;bkStat('bk_dupStatus','⏳ Deleting...','info');
   let del=0,fail=0;
   for(let i=0;i<bk_toDelete.length;i++){bkProg('bk_dupProg',i+1,bk_toDelete.length);try{const{error}=await db.from('clients').delete().eq('id',bk_toDelete[i]);if(error)throw error;del++;}catch(e){bkLog('bk_dupLog','FAIL '+bk_toDelete[i]+': '+e.message,'#fc8181');fail++;}if((i+1)%10===0)await new Promise(r=>setTimeout(r,150));}
   bkProg('bk_dupProg',bk_toDelete.length,bk_toDelete.length);bkLog('bk_dupLog','DONE Deleted:'+del+' Failed:'+fail,'#68d391');
-  bkStat('bk_dupStatus',fail===0?'Done\! Removed '+del+' duplicates.':'Deleted '+del+', Failed:'+fail,fail===0?'ok':'warn');
+  bkStat('bk_dupStatus',fail===0?'Done! Removed '+del+' duplicates.':'Deleted '+del+', Failed:'+fail,fail===0?'ok':'warn');
   btn.textContent='Done';document.getElementById('bk_scanBtn').disabled=false;bk_toDelete=[];
   await loadAllData();renderDashboard();
 }
@@ -3114,7 +3114,7 @@ async function bkImport(){
   }
   bkProg('bk_impProg',BK_CLIENTS.length,BK_CLIENTS.length);
   bkLog('bk_impLog','DONE Added:'+added+' Skipped:'+skipped+' Failed:'+failed,'#90cdf4');
-  bkStat('bk_impStatus',added>0?'Added '+added+' clients\! Skipped '+skipped+' existing.':skipped===BK_CLIENTS.length?'All clients already exist.':'Added:'+added+' Failed:'+failed,added>0?'ok':skipped===BK_CLIENTS.length?'info':'err');
+  bkStat('bk_impStatus',added>0?'Added '+added+' clients! Skipped '+skipped+' existing.':skipped===BK_CLIENTS.length?'All clients already exist.':'Added:'+added+' Failed:'+failed,added>0?'ok':skipped===BK_CLIENTS.length?'info':'err');
   btn.disabled=false;btn.textContent='Import All 122 Clients';
   if(added>0){await loadAllData();renderDashboard();}
 }
@@ -3123,22 +3123,22 @@ function bkFilesSelected(files){
   let ok=0,no=0;
   for(const f of arr){const key=f.name.toLowerCase().replace('.pdf','').trim();const cl=BK_PDF_LOOKUP[key]||null;if(cl)ok++;else no++;bk_fileMap.push({file:f,client:cl});}
   bkLog('bk_pdfLog',arr.length+' files: '+ok+' matched, '+no+' unmatched.','#90cdf4');
-  bkStat('bk_pdfStatus',arr.length+' files. Matched: '+ok+(no>0?'. Unmatched: '+no+' (will skip).':'. All matched\!'),'ok');
+  bkStat('bk_pdfStatus',arr.length+' files. Matched: '+ok+(no>0?'. Unmatched: '+no+' (will skip).':'. All matched!'),'ok');
   document.getElementById('bk_pdfFileInfo').style.display='block';
   document.getElementById('bk_uploadBtn').disabled=(ok===0);
 }
 async function bkUpload(){
   const toUp=bk_fileMap.filter(m=>m.client);
-  if(\!toUp.length){alert('No matched files.');return;}
-  if(\!confirm('Upload '+toUp.length+' PDFs? This may take a few minutes.'))return;
+  if(!toUp.length){alert('No matched files.');return;}
+  if(!confirm('Upload '+toUp.length+' PDFs? This may take a few minutes.'))return;
   const btn=document.getElementById('bk_uploadBtn');btn.disabled=true;btn.textContent='⏳ Uploading...';
   bkStat('bk_pdfStatus','⏳ Uploading — do not close this window.','info');
   document.getElementById('bk_pdfLog').innerHTML='';
   bkLog('bk_pdfLog','Loading client IDs...','#90cdf4');
   let allC=[],fr2=0;
-  try{while(true){const{data,error}=await db.from('clients').select('id,first_name,last_name,address').range(fr2,fr2+999);if(error)throw error;if(\!data||\!data.length)break;allC=allC.concat(data);if(data.length<1000)break;fr2+=1000;}}
+  try{while(true){const{data,error}=await db.from('clients').select('id,first_name,last_name,address').range(fr2,fr2+999);if(error)throw error;if(!data||!data.length)break;allC=allC.concat(data);if(data.length<1000)break;fr2+=1000;}}
   catch(e){bkLog('bk_pdfLog','ERROR: '+e.message,'#fc8181');btn.disabled=false;btn.textContent='Upload All PDFs to Clients';return;}
-  const cidMap={};for(const c of allC){const k=((c.first_name||'')+'||'+(c.last_name||'')+'||'+(c.address||'')).toLowerCase().trim();if(\!cidMap[k])cidMap[k]=c.id;}
+  const cidMap={};for(const c of allC){const k=((c.first_name||'')+'||'+(c.last_name||'')+'||'+(c.address||'')).toLowerCase().trim();if(!cidMap[k])cidMap[k]=c.id;}
   bkLog('bk_pdfLog','Loaded '+allC.length+' clients. Uploading...','#90cdf4');
   let up=0,sk=0,fa=0;
   for(let i=0;i<toUp.length;i++){
@@ -3146,7 +3146,7 @@ async function bkUpload(){
     document.getElementById('bk_pdfPt').textContent=(i+1)+'/'+toUp.length+' — '+m.file.name;
     const cKey=((m.client.fn||'')+'||'+(m.client.ln||'')+'||'+(m.client.addr||'')).toLowerCase().trim();
     const cid=cidMap[cKey];
-    if(\!cid){bkLog('bk_pdfLog','SKIP '+m.file.name+' — no client','#f6e05e');sk++;continue;}
+    if(!cid){bkLog('bk_pdfLog','SKIP '+m.file.name+' — no client','#f6e05e');sk++;continue;}
     try{
       const{data:ex}=await db.from('client_files').select('id').eq('client_id',cid).eq('file_name',m.file.name).maybeSingle();
       if(ex){bkLog('bk_pdfLog','SKIP '+m.file.name+' — exists','#f6e05e');sk++;continue;}
@@ -3158,7 +3158,7 @@ async function bkUpload(){
   }
   bkProg('bk_pdfProg',toUp.length,toUp.length);
   bkLog('bk_pdfLog','DONE Uploaded:'+up+' Skipped:'+sk+' Failed:'+fa,'#90cdf4');
-  bkStat('bk_pdfStatus',up>0?''+up+' PDFs uploaded\! Open any client to see their files.':'Uploaded:'+up+' Failed:'+fa,up>0?'ok':'err');
+  bkStat('bk_pdfStatus',up>0?''+up+' PDFs uploaded! Open any client to see their files.':'Uploaded:'+up+' Failed:'+fa,up>0?'ok':'err');
   btn.disabled=false;btn.textContent='Upload All PDFs to Clients';
 }
 
