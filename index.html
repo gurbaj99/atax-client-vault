@@ -3190,17 +3190,18 @@ async function bkScan() {
             fr += 1000;
         }
         bkLog('bk_dupLog', 'Loaded ' + all.length + ' records.', '#90cdf4');
-        // Group by name only (case-insensitive) to catch CAPS vs Title Case duplicates
+        // Group by FULL NAME combined (case-insensitive) to catch ALL CAPS vs Title Case
+        // e.g. first_name='ADESHPAL SINGH' last_name='' matches first_name='Adeshpal' last_name='Singh'
         const g = {};
         for (const c of all) {
-            const k = ((c.first_name||'').trim() + '||' + (c.last_name||'').trim()).toLowerCase();
-            if (!g[k]) g[k] = [];
-            g[k].push(c);
+            const fullName = ((c.first_name||'') + ' ' + (c.last_name||'')).toLowerCase().trim().replace(/\s+/g,' ');
+            if (!g[fullName]) g[fullName] = [];
+            g[fullName].push(c);
         }
         let dg = [];
         for (const recs of Object.values(g)) {
             if (recs.length < 2) continue;
-            // Sub-group by normalized address so different people with same name are kept separate
+            // Sub-group by normalized address
             const addrGroups = {};
             for (const c of recs) {
                 const addrKey = (c.address||'').toLowerCase().trim().replace(/\s+/g,' ');
@@ -3209,13 +3210,13 @@ async function bkScan() {
             }
             for (const arecs of Object.values(addrGroups)) {
                 if (arecs.length > 1) {
-                    // Keep the record with the most data (longer notes+address)
-                    arecs.sort((a,b) => ((b.notes||'').length + (b.address||'').length) - ((a.notes||'').length + (a.address||'').length));
+                    // Keep the record with the most complete data (has last_name + address)
+                    arecs.sort((a,b) => ((b.last_name||'').length + (b.notes||'').length + (b.address||'').length) - ((a.last_name||'').length + (a.notes||'').length + (a.address||'').length));
                     dg.push({ keep: arecs[0], dups: arecs.slice(1) });
                     arecs.slice(1).forEach(r => bk_toDelete.push(r.id));
                 }
             }
-            // Also catch: same name, one record has no address (blank addr = same person)
+            // Also catch: same full name, one has no address
             const withAddr = recs.filter(c => (c.address||'').trim().length > 0);
             const noAddr = recs.filter(c => !(c.address||'').trim());
             if (withAddr.length > 0 && noAddr.length > 0) {
@@ -3399,7 +3400,7 @@ async function bkUpload() {
     }
     bkProg('bk_pdfProg', toUp.length, toUp.length);
     bkLog('bk_pdfLog', 'DONE  Uploaded: ' + up + '  Skipped: ' + sk + '  Failed: ' + fa, '#90cdf4');
-    bkStat('bk_pdfStatus', up > 0 ? '\ud83c\udf89 Uploaded ' + up + ' PDFs\!' : (sk === toUp.length ? 'All PDFs already attached.' : 'Done. Uploaded: ' + up + ' Failed: ' + fa), up > 0 ? 'ok' : 'info');
+    bkStat('bk_pdfStatus', up > 0 ? '\ud83c\udf89 Uploaded ' + up + ' PDFs!' : (sk === toUp.length ? 'All PDFs already attached.' : 'Done. Uploaded: ' + up + ' Failed: ' + fa), up > 0 ? 'ok' : 'info');
     btn.disabled = false; btn.textContent = '\u2b06\ufe0f Upload All PDFs to Clients';
 }
 </script>
