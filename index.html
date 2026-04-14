@@ -3190,20 +3190,44 @@ async function bkScan() {
             fr += 1000;
         }
         bkLog('bk_dupLog', 'Loaded ' + all.length + ' records.', '#90cdf4');
+        // Group by name only (case-insensitive) to catch CAPS vs Title Case duplicates
         const g = {};
         for (const c of all) {
-            const k = ((c.first_name||'')+'||'+(c.last_name||'')+'||'+(c.address||'')).toLowerCase().trim();
+            const k = ((c.first_name||'').trim() + '||' + (c.last_name||'').trim()).toLowerCase();
             if (!g[k]) g[k] = [];
             g[k].push(c);
         }
         let dg = [];
         for (const recs of Object.values(g)) {
-            if (recs.length > 1) {
-                dg.push({ keep: recs[0], dups: recs.slice(1) });
-                recs.slice(1).forEach(r => bk_toDelete.push(r.id));
+            if (recs.length < 2) continue;
+            // Sub-group by normalized address so different people with same name are kept separate
+            const addrGroups = {};
+            for (const c of recs) {
+                const addrKey = (c.address||'').toLowerCase().trim().replace(/\s+/g,' ');
+                if (!addrGroups[addrKey]) addrGroups[addrKey] = [];
+                addrGroups[addrKey].push(c);
+            }
+            for (const arecs of Object.values(addrGroups)) {
+                if (arecs.length > 1) {
+                    // Keep the record with the most data (longer notes+address)
+                    arecs.sort((a,b) => ((b.notes||'').length + (b.address||'').length) - ((a.notes||'').length + (a.address||'').length));
+                    dg.push({ keep: arecs[0], dups: arecs.slice(1) });
+                    arecs.slice(1).forEach(r => bk_toDelete.push(r.id));
+                }
+            }
+            // Also catch: same name, one record has no address (blank addr = same person)
+            const withAddr = recs.filter(c => (c.address||'').trim().length > 0);
+            const noAddr = recs.filter(c => !(c.address||'').trim());
+            if (withAddr.length > 0 && noAddr.length > 0) {
+                noAddr.forEach(r => {
+                    if (!bk_toDelete.includes(r.id)) {
+                        bk_toDelete.push(r.id);
+                        dg.push({ keep: withAddr[0], dups: [r] });
+                    }
+                });
             }
         }
-        const tot = all.length, uniq = Object.keys(g).length, dups = bk_toDelete.length;
+        const tot = all.length, uniq = tot - bk_toDelete.length, dups = bk_toDelete.length;
         const ds = document.getElementById('bk_dupStats');
         ds.style.display = 'flex';
         document.getElementById('bk_sTotal').textContent = tot;
@@ -3330,10 +3354,13 @@ async function bkUpload() {
         btn.disabled = false; btn.textContent = '⬆️ Upload All PDFs to Clients';
         return;
     }
+    // Build cidMap with BOTH full key and name-only key so CAPS vs Title Case clients are still found
     const cidMap = {};
     for (const c of allC) {
-        const k = ((c.first_name||'')+'||'+(c.last_name||'')+'||'+(c.address||'')).toLowerCase().trim();
-        if (!cidMap[k]) cidMap[k] = c.id;
+        const nameKey = ((c.first_name||'').trim() + '||' + (c.last_name||'').trim()).toLowerCase();
+        const fullKey = nameKey + '||' + (c.address||'').toLowerCase().trim().replace(/\s+/g,' ');
+        if (!cidMap[fullKey]) cidMap[fullKey] = c.id;
+        if (!cidMap[nameKey]) cidMap[nameKey] = c.id; // fallback: name-only
     }
     bkLog('bk_pdfLog', 'Loaded ' + allC.length + ' clients. Starting uploads...', '#90cdf4');
     let up = 0, sk = 0, fa = 0;
@@ -3341,33 +3368,39 @@ async function bkUpload() {
         const m = toUp[i];
         bkProg('bk_pdfProg', i + 1, toUp.length);
         document.getElementById('bk_pdfPt').textContent = (i + 1) + '/' + toUp.length + ' — ' + m.file.name;
-        const cKey = ((m.client.fn||'')+'||'+(m.client.ln||'')+'||'+(m.client.addr||'')).toLowerCase().trim();
-        const cid = cidMap[cKey];
+        const nameKey2 = ((m.client.fn||'').trim() + '||' + (m.client.ln||'').trim()).toLowerCase();
+        const fullKey2 = nameKey2 + '||' + (m.client.addr||'').toLowerCase().trim().replace(/\s+/g,' ');
+        const cid = cidMap[fullKey2] || cidMap[nameKey2]; // try full match first, then name-only
         if (!cid) { bkLog('bk_pdfLog', 'SKIP ' + m.file.name + ' — no client found', '#f6e05e'); sk++; continue; }
         try {
-            const { data: ex } = await db.from('client_files').select('id').eq('client_id', cid).eq('file_name', m.file.name).maybeSingle();
-            if (ex) { bkLog('bk_pdfLog', 'SKIP ' + m.file.name + ' — already uploaded', '#f6e05e'); sk++; continue; }
-            const b64 = await new Promise((res, rej) => {
-                const r = new FileReader();
-                r.onload = e => res(e.target.result);
-                r.onerror = () => rej(new Error('read failed'));
-                r.readAsDataURL(m.file);
+                        const { data: ex } = await db.from('client_files').select('id').eq('client_id', cid).eq('file_name', m.file.name).maybeSingle();
+            if (ex) { bkLog('bk_pdfLog', 'SKIP (exists) ' + m.file.name, '#a0aec0'); sk++; continue; }
+            const dataUrl = await new Promise((res, rej) => {
+                const reader = new FileReader();
+                reader.onload = () => res(reader.result);
+                reader.onerror = rej;
+                reader.readAsDataURL(m.file);
             });
-            const { error } = await db.from('client_files').insert({ client_id: cid, file_name: m.file.name, file_type: 'application/pdf', file_size: m.file.size, file_data: b64 });
-            if (error) throw error;
+            const { error: insErr } = await db.from('client_files').insert([{
+                client_id: cid,
+                file_name: m.file.name,
+                file_type: 'application/pdf',
+                file_size: m.file.size,
+                file_data: dataUrl
+            }]);
+            if (insErr) throw insErr;
             up++;
-            bkLog('bk_pdfLog', '+ ' + m.file.name + ' -> ' + m.client.fn + ' ' + m.client.ln, '#68d391');
+            bkLog('bk_pdfLog', '\u2705 ' + m.file.name, '#68d391');
         } catch(e) {
-            bkLog('bk_pdfLog', 'ERR ' + m.file.name + ': ' + e.message, '#fc8181');
+            bkLog('bk_pdfLog', '\u274c ' + m.file.name + ': ' + e.message, '#fc8181');
             fa++;
         }
-        if ((i + 1) % 5 === 0) await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 100));
     }
     bkProg('bk_pdfProg', toUp.length, toUp.length);
     bkLog('bk_pdfLog', 'DONE  Uploaded: ' + up + '  Skipped: ' + sk + '  Failed: ' + fa, '#90cdf4');
-    bkStat('bk_pdfStatus', up > 0 ? '🎉 ' + up + ' PDFs uploaded! Open any client to see their files.' : 'Uploaded: ' + up + ' Failed: ' + fa, up > 0 ? 'ok' : 'err');
-    btn.disabled = false;
-    btn.textContent = '⬆️ Upload All PDFs to Clients';
+    bkStat('bk_pdfStatus', up > 0 ? '\ud83c\udf89 Uploaded ' + up + ' PDFs\!' : (sk === toUp.length ? 'All PDFs already attached.' : 'Done. Uploaded: ' + up + ' Failed: ' + fa), up > 0 ? 'ok' : 'info');
+    btn.disabled = false; btn.textContent = '\u2b06\ufe0f Upload All PDFs to Clients';
 }
 </script>
 </body>
